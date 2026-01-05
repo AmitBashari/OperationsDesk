@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workstation - Investment Slider Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .debug-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        .debug-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .debug-btn:hover {
+            background: #ff5252;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+        }
+
+        .gem-balance-container {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .balance-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .gem-balance {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 1.8em;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .gem-icon {
+            font-size: 1.2em;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .station-sprite-area {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border: 3px dashed #ff9a56;
+            border-radius: 16px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff6b35;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .workstation-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .level-display {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .level-info {
+            color: #666;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .upgrade-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95em;
+            transition: transform 0.2s;
+            white-space: nowrap;
+        }
+
+        .upgrade-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .upgrade-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .proposals-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .proposals-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 5px;
+        }
+
+        .proposal-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 4px solid transparent;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .proposal-card:active {
+            transform: scale(0.98);
+        }
+
+        .proposal-card.selected {
+            border-color: #667eea;
+            box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+            transform: translateY(-4px);
+        }
+
+        .proposal-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .proposal-card.dimmed {
+            opacity: 0.4;
+            filter: grayscale(0.5);
+        }
+
+        .proposal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .proposal-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .proposal-duration {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .proposal-profit {
+            color: #555;
+            font-size: 1em;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .proposal-expected {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .proposal-expected-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .proposal-expected-value {
+            font-size: 1.3em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            color: #667eea;
+            font-weight: bold;
+            border-bottom: 1px dotted #667eea;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 8px;
+            padding: 12px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85em;
+            line-height: 1.4;
+            font-weight: normal;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .investment-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .investment-section.hidden {
+            display: none;
+        }
+
+        .investment-header {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .slider-container {
+            margin-bottom: 24px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+
+        .slider-input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .number-input {
+            width: 100px;
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .return-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .return-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            font-size: 1.2em;
+        }
+
+        .return-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .return-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+        }
+
+        .return-value {
+            font-weight: bold;
+            color: white;
+            font-size: 1.15em;
+        }
+
+        .return-highlight {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 3px 12px;
+            border-radius: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .start-btn, .cancel-btn, .collect-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            color: white;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(81, 207, 102, 0.4);
+        }
+
+        .cancel-btn {
+            background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+            color: #666;
+        }
+
+        .cancel-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(189, 189, 189, 0.3);
+        }
+
+        .collect-btn {
+            background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+            color: #333;
+        }
+
+        .collect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 212, 59, 0.4);
+        }
+
+        .active-proposal {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .active-proposal.hidden {
+            display: none;
+        }
+
+        .active-header {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .timer-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .timer-label {
+            font-size: 1em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .timer-value {
+            font-size: 3em;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .active-details {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .result-modal.hidden {
+            display: none;
+        }
+
+        .result-content {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .result-title {
+            font-size: 2em;
+            color: #51cf66;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .result-gems {
+            font-size: 3.5em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 30px;
+            animation: gemPulse 0.6s ease-in-out;
+        }
+
+        @keyframes gemPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .result-breakdown {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .breakdown-row:last-child {
+            margin-bottom: 0;
+            padding-top: 10px;
+            border-top: 2px solid #ddd;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .result-close-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 48px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .result-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .level-up-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.6) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            animation: levelUpGlow 1s ease-out;
+            pointer-events: none;
+        }
+
+        .level-up-overlay.hidden {
+            display: none;
+        }
+
+        @keyframes levelUpGlow {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1);
+            }
+        }
+
+        .level-up-text {
+            font-size: 4em;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            animation: levelUpPulse 1s ease-out;
+        }
+
+        @keyframes levelUpPulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .gem-balance {
+                font-size: 1.3em;
+                padding: 10px 24px;
+            }
+
+            .balance-label {
+                font-size: 0.75em;
+            }
+
+            .station-sprite-area {
+                height: 120px;
+                font-size: 0.9em;
+                margin-bottom: 15px;
+            }
+
+            .workstation-info {
+                padding: 15px;
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .upgrade-btn {
+                font-size: 0.85em;
+                padding: 10px 16px;
+                width: 100%;
+            }
+
+            .proposals-container {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .proposal-card {
+                padding: 16px;
+            }
+
+            .proposal-name {
+                font-size: 1.2em;
+            }
+
+            .proposal-duration {
+                font-size: 1em;
+                padding: 6px 12px;
+            }
+
+            .proposal-profit {
+                font-size: 0.95em;
+            }
+
+            .proposal-expected {
+                padding: 8px;
+            }
+
+            .proposal-expected-value {
+                font-size: 1.1em;
+            }
+
+            .investment-section {
+                padding: 16px;
+            }
+
+            .investment-header {
+                font-size: 1.1em;
+            }
+
+            .slider-container {
+                margin-bottom: 20px;
+            }
+
+            .slider-input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .number-input {
+                width: 100%;
+            }
+
+            .return-display {
+                padding: 18px;
+            }
+
+            .return-row {
+                font-size: 1em;
+                margin-bottom: 0;
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .return-label {
+                font-size: 0.9em;
+            }
+
+            .return-value {
+                font-size: 1.2em;
+            }
+
+            .timer-display {
+                padding: 20px;
+            }
+
+            .timer-value {
+                font-size: 1.5em;
+            }
+
+            .active-details {
+                padding: 15px;
+            }
+
+            .detail-row {
+                font-size: 1em;
+            }
+
+            .result-gems {
+                font-size: 2em;
+            }
+
+            .result-content {
+                padding: 30px 20px;
+            }
+
+            .level-up-text {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // ============================================
+        // CONFIGURATION - Easy to modify
+        // ============================================
+        const CONFIG = {
+            // Workstation levels and investment caps
+            levels: [
+                { level: 1, maxInvestment: 100, upgradeCost: 50 },
+                { level: 2, maxInvestment: 250, upgradeCost: 150 },
+                { level: 3, maxInvestment: 400, upgradeCost: 300 },
+                { level: 4, maxInvestment: 550, upgradeCost: 500 },
+                { level: 5, maxInvestment: 700, upgradeCost: 750 },
+                { level: 6, maxInvestment: 850, upgradeCost: 1000 },
+                { level: 7, maxInvestment: 1000, upgradeCost: 1500 },
+                { level: 8, maxInvestment: 1150, upgradeCost: 2000 },
+                { level: 9, maxInvestment: 1300, upgradeCost: 2500 },
+                { level: 10, maxInvestment: 1500, upgradeCost: null },
+            ],
+
+            // Base proposal definitions (scaled by level)
+            baseProposals: [
+                {
+                    id: 'growth',
+                    name: 'Growth',
+                    duration: 24 * 60 * 60, // 24 hours in seconds
+                    baseMinReturn: 0.5,
+                    baseMaxReturn: 1.0,
+                    scaleFactor: 0.05,
+                },
+                {
+                    id: 'commitment',
+                    name: 'Commitment',
+                    duration: 7 * 24 * 60 * 60, // 7 days in seconds
+                    baseMinReturn: 7.0,
+                    baseMaxReturn: 10.0,
+                    scaleFactor: 0.5,
+                }
+            ],
+
+            // Starting gems
+            startingGems: 500,
+
+            // Slider step
+            sliderStep: 10,
+
+            // Minimum investment
+            minInvestment: 10
+        };
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function formatTime(seconds) {
+            const days = Math.floor(seconds / (24 * 3600));
+            const hours = Math.floor((seconds % (24 * 3600)) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+
+            if (days > 0) {
+                return `${days}d ${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
+            }
+            return `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
+        }
+
+        function formatDuration(seconds) {
+            const hours = seconds / 3600;
+            if (hours >= 168) { // 7 days
+                return `${hours / 168}w`;
+            }
+            if (hours >= 24) {
+                return `${hours / 24}d`;
+            }
+            return `${hours}h`;
+        }
+
+        function getScaledProposals(level) {
+            return CONFIG.baseProposals.map(base => ({
+                ...base,
+                minReturn: Math.round(base.baseMinReturn + (level * base.scaleFactor)),
+                maxReturn: Math.round(base.baseMaxReturn + (level * base.scaleFactor))
+            }));
+        }
+
+        function calculateProfitPercentage(proposal) {
+            const avgReturn = (proposal.minReturn + proposal.maxReturn) / 2;
+            const percentage = (avgReturn / CONFIG.minInvestment) * 100;
+            return Math.round(percentage);
+        }
+
+        function calculateProfitRange(proposal) {
+            const minPercent = Math.round((proposal.minReturn / CONFIG.minInvestment) * 100);
+            const maxPercent = Math.round((proposal.maxReturn / CONFIG.minInvestment) * 100);
+
+            if (minPercent === maxPercent) {
+                return `+${minPercent}%`;
+            }
+            return `+${minPercent}% to +${maxPercent}%`;
+        }
+
+        function calculateExpectedReturn(proposal, investment) {
+            const avgReturn = (proposal.minReturn + proposal.maxReturn) / 2;
+            const result = avgReturn * (investment / CONFIG.minInvestment);
+            return Math.max(0.01, parseFloat(result.toFixed(2)));
+        }
+
+        function calculateMinReturn(proposal, investment) {
+            const result = proposal.minReturn * (investment / CONFIG.minInvestment);
+            return Math.max(0.01, parseFloat(result.toFixed(2)));
+        }
+
+        function calculateMaxReturn(proposal, investment) {
+            const result = proposal.maxReturn * (investment / CONFIG.minInvestment);
+            return Math.max(0.01, parseFloat(result.toFixed(2)));
+        }
+
+        function calculateActualReturn(proposal, investment) {
+            const min = calculateMinReturn(proposal, investment);
+            const max = calculateMaxReturn(proposal, investment);
+
+            if (min === max) return min;
+
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // ============================================
+        // MAIN APP COMPONENT
+        // ============================================
+        function App() {
+            const [gems, setGems] = useState(CONFIG.startingGems);
+            const [workstationLevel, setWorkstationLevel] = useState(0);
+            const [selectedProposal, setSelectedProposal] = useState(null);
+            const [investment, setInvestment] = useState(CONFIG.minInvestment);
+            const [activeProposal, setActiveProposal] = useState(null);
+            const [timeRemaining, setTimeRemaining] = useState(0);
+            const [showResult, setShowResult] = useState(false);
+            const [result, setResult] = useState(null);
+            const [showLevelUp, setShowLevelUp] = useState(false);
+            const [proposals, setProposals] = useState(getScaledProposals(1));
+
+            const currentLevel = CONFIG.levels[workstationLevel];
+            const maxInvestment = currentLevel.maxInvestment;
+            const canUpgrade = workstationLevel < CONFIG.levels.length - 1 && gems >= currentLevel.upgradeCost;
+
+            // Timer effect
+            useEffect(() => {
+                if (!activeProposal || timeRemaining <= 0) return;
+
+                const interval = setInterval(() => {
+                    setTimeRemaining(prev => {
+                        if (prev <= 1) {
+                            clearInterval(interval);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+
+                return () => clearInterval(interval);
+            }, [activeProposal, timeRemaining]);
+
+            const handleUpgrade = () => {
+                if (canUpgrade) {
+                    setGems(prev => prev - currentLevel.upgradeCost);
+                    const newLevel = workstationLevel + 1;
+                    setWorkstationLevel(newLevel);
+
+                    // Show level up effect
+                    setShowLevelUp(true);
+                    setTimeout(() => setShowLevelUp(false), 1000);
+
+                    // Refresh proposals with better returns
+                    setProposals(getScaledProposals(newLevel + 1));
+                }
+            };
+
+            const handleProposalSelect = (proposal) => {
+                if (!activeProposal) {
+                    setSelectedProposal(proposal);
+                    setInvestment(Math.min(CONFIG.minInvestment, maxInvestment));
+
+                    // Scroll to investment section
+                    setTimeout(() => {
+                        const investmentSection = document.querySelector('.investment-section');
+                        if (investmentSection) {
+                            investmentSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 100);
+                }
+            };
+
+            const handleInvestmentChange = (value) => {
+                const numValue = parseInt(value) || CONFIG.minInvestment;
+                const clamped = Math.max(CONFIG.minInvestment, Math.min(maxInvestment, numValue));
+                const rounded = Math.round(clamped / CONFIG.sliderStep) * CONFIG.sliderStep;
+                setInvestment(rounded);
+            };
+
+            const handleStart = () => {
+                if (selectedProposal && investment <= gems) {
+                    setGems(prev => prev - investment);
+                    setActiveProposal({
+                        proposal: selectedProposal,
+                        investment: investment,
+                        startTime: Date.now()
+                    });
+                    setTimeRemaining(selectedProposal.duration);
+                    setSelectedProposal(null);
+                }
+            };
+
+            const handleCancel = () => {
+                if (activeProposal) {
+                    setGems(prev => prev + activeProposal.investment);
+                    setActiveProposal(null);
+                    setTimeRemaining(0);
+                }
+            };
+
+            const handleCollect = () => {
+                if (activeProposal && timeRemaining === 0) {
+                    const profit = calculateActualReturn(activeProposal.proposal, activeProposal.investment);
+                    const totalReturn = activeProposal.investment + profit;
+
+                    setResult({
+                        investment: activeProposal.investment,
+                        profit: profit,
+                        total: totalReturn
+                    });
+
+                    setGems(prev => prev + totalReturn);
+                    setShowResult(true);
+                    setActiveProposal(null);
+                }
+            };
+
+            const handleCloseResult = () => {
+                setShowResult(false);
+                setResult(null);
+            };
+
+            // Debug: Skip time
+            const handleDebugSkipTime = () => {
+                if (activeProposal) {
+                    setTimeRemaining(0);
+                }
+            };
+
+            return (
+                <>
+                    <div className="debug-controls">
+                        <button className="debug-btn" onClick={handleDebugSkipTime}>
+                            ⏩ Skip Time
+                        </button>
+                    </div>
+
+                    <div className="container">
+                        <div className="header">
+                            <h1>WORKSTATION</h1>
+                            <div className="gem-balance-container">
+                                <div className="balance-label">Your Balance</div>
+                                <div className="gem-balance">
+                                    <span className="gem-icon">💎</span>
+                                    <span>{gems}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="main-content">
+                            {/* Station Sprite */}
+                            <div className="station-sprite-area">
+                                [Station Sprite Area]
+                            </div>
+
+                            {/* Workstation Info */}
+                            <div className="workstation-info">
+                                <div>
+                                    <div className="level-display">Level {currentLevel.level}</div>
+                                    <div className="level-info">Max: {maxInvestment} Gems</div>
+                                </div>
+                                {workstationLevel < CONFIG.levels.length - 1 ? (
+                                    <button
+                                        className="upgrade-btn"
+                                        onClick={handleUpgrade}
+                                        disabled={!canUpgrade || activeProposal}
+                                    >
+                                        {activeProposal
+                                            ? 'Upgrade Locked'
+                                            : canUpgrade
+                                            ? `Upgrade (${currentLevel.upgradeCost} 💎)`
+                                            : `Need ${currentLevel.upgradeCost} 💎`}
+                                    </button>
+                                ) : (
+                                    <div style={{ color: '#51cf66', fontWeight: 'bold' }}>MAX LEVEL</div>
+                                )}
+                            </div>
+
+                            {/* Active Proposal Display */}
+                            {activeProposal && (
+                                <div className="active-proposal">
+                                    <div className="active-header">
+                                        {activeProposal.proposal.name} - {formatDuration(activeProposal.proposal.duration)}
+                                    </div>
+
+                                    <div className="timer-display">
+                                        <div className="timer-label">Time Remaining</div>
+                                        <div className="timer-value">{formatTime(timeRemaining)}</div>
+                                    </div>
+
+                                    <div className="active-details">
+                                        <div className="detail-row">
+                                            <span className="detail-label">Invested:</span>
+                                            <span className="detail-value">{activeProposal.investment} Gems</span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <span className="detail-label">Min Return:</span>
+                                            <span className="detail-value">
+                                                {(activeProposal.investment + calculateMinReturn(activeProposal.proposal, activeProposal.investment)).toFixed(2)} Gems
+                                            </span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <span className="detail-label">Max Return:</span>
+                                            <span className="detail-value">
+                                                {(activeProposal.investment + calculateMaxReturn(activeProposal.proposal, activeProposal.investment)).toFixed(2)} Gems
+                                            </span>
+                                        </div>
+                                        <div className="detail-row">
+                                            <span className="detail-label">Expected Return:</span>
+                                            <span className="detail-value" style={{ color: '#667eea' }}>
+                                                {(activeProposal.investment + calculateExpectedReturn(activeProposal.proposal, activeProposal.investment)).toFixed(2)} Gems
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="action-buttons">
+                                        {timeRemaining > 0 ? (
+                                            <button className="cancel-btn" onClick={handleCancel}>
+                                                Cancel (Refund)
+                                            </button>
+                                        ) : (
+                                            <button className="collect-btn" onClick={handleCollect}>
+                                                Collect Rewards
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Proposals Section */}
+                            {!activeProposal && (
+                                <>
+                                    <div className="proposals-section">
+                                        <div className="section-title">Choose Proposal</div>
+                                        <div className="proposals-container">
+                                            {proposals.map(proposal => {
+                                                const isSelected = selectedProposal?.id === proposal.id;
+                                                const isDimmed = selectedProposal && !isSelected;
+                                                const expectedAt100 = 100 + calculateExpectedReturn(proposal, 100);
+                                                const profitRange = calculateProfitRange(proposal);
+
+                                                return (
+                                                    <div
+                                                        key={proposal.id}
+                                                        className={`proposal-card ${isSelected ? 'selected' : ''} ${isDimmed ? 'dimmed' : ''}`}
+                                                        onClick={() => handleProposalSelect(proposal)}
+                                                    >
+                                                        <div className="proposal-header">
+                                                            <div className="proposal-name">{proposal.name}</div>
+                                                            <div className="proposal-duration">
+                                                                {formatDuration(proposal.duration)}
+                                                            </div>
+                                                        </div>
+                                                        <div className="proposal-profit">
+                                                            Profit: {profitRange}
+                                                        </div>
+                                                        <div className="proposal-expected">
+                                                            <div className="proposal-expected-label">Expected at 100 💎</div>
+                                                            <div className="proposal-expected-value">
+                                                                {expectedAt100.toFixed(2)} 💎
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Investment Section */}
+                                    <div className={`investment-section ${!selectedProposal ? 'hidden' : ''}`}>
+                                        <div className="investment-header">Set Investment Amount</div>
+
+                                        <div className="slider-container">
+                                            <div className="slider-label">
+                                                <span>Investment</span>
+                                                <span>{investment} / {maxInvestment} 💎</span>
+                                            </div>
+                                            <div className="slider-input-group">
+                                                <input
+                                                    type="range"
+                                                    className="slider"
+                                                    min={CONFIG.minInvestment}
+                                                    max={maxInvestment}
+                                                    step={CONFIG.sliderStep}
+                                                    value={investment}
+                                                    onChange={(e) => handleInvestmentChange(e.target.value)}
+                                                />
+                                                <input
+                                                    type="number"
+                                                    className="number-input"
+                                                    min={CONFIG.minInvestment}
+                                                    max={maxInvestment}
+                                                    step={CONFIG.sliderStep}
+                                                    value={investment}
+                                                    onChange={(e) => handleInvestmentChange(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {selectedProposal && (
+                                            <>
+                                                <div className="return-display">
+                                                    <div className="return-row">
+                                                        <span className="return-label">You Get Back</span>
+                                                        <span className="return-value return-highlight">
+                                                            {(investment + calculateMinReturn(selectedProposal, investment)).toFixed(2)} - {(investment + calculateMaxReturn(selectedProposal, investment)).toFixed(2)} 💎
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="action-buttons">
+                                                    <button
+                                                        className="start-btn"
+                                                        onClick={handleStart}
+                                                        disabled={investment > gems}
+                                                    >
+                                                        {investment > gems ? 'Not Enough Gems' : 'Start Proposal'}
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Result Modal */}
+                    <div className={`result-modal ${!showResult ? 'hidden' : ''}`}>
+                        {result && (
+                            <div className="result-content">
+                                <div className="result-title">Proposal Complete!</div>
+                                <div className="result-gems">+{result.total} 💎</div>
+
+                                <div className="result-breakdown">
+                                    <div className="breakdown-row">
+                                        <span>Investment Returned:</span>
+                                        <span>{result.investment} Gems</span>
+                                    </div>
+                                    <div className="breakdown-row">
+                                        <span>Profit Earned:</span>
+                                        <span>+{result.profit} Gems</span>
+                                    </div>
+                                    <div className="breakdown-row">
+                                        <span>Total Received:</span>
+                                        <span>{result.total} Gems</span>
+                                    </div>
+                                </div>
+
+                                <button className="result-close-btn" onClick={handleCloseResult}>
+                                    Continue
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Level Up Overlay */}
+                    <div className={`level-up-overlay ${!showLevelUp ? 'hidden' : ''}`}>
+                        <div className="level-up-text">LEVEL UP!</div>
+                    </div>
+                </>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
