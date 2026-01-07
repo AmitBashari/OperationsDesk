@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Workstation V2 - Gem Mine & Treasure Trove</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -22,12 +22,19 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
+            max-width: 100vw;
+            position: fixed;
+            width: 100%;
+            height: 100vh;
         }
 
         #root {
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-width: 100vw;
         }
 
         /* Header - Sticky */
@@ -213,26 +220,6 @@
         .production-rate span {
             color: #a855f7;
             font-weight: bold;
-        }
-
-        /* Floating Particles */
-        .particle {
-            position: absolute;
-            font-size: 16px;
-            pointer-events: none;
-            animation: floatUp 3s ease-out forwards;
-            opacity: 0;
-        }
-
-        @keyframes floatUp {
-            0% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-200px) scale(0.5);
-                opacity: 0;
-            }
         }
 
         /* Treasure Deposits Section */
@@ -711,8 +698,6 @@
             const [showInvestModal, setShowInvestModal] = useState(null);
             const [investAmount, setInvestAmount] = useState(100);
             const [showLevelUp, setShowLevelUp] = useState(false);
-            const mineRef = useRef(null);
-            const particleIdRef = useRef(0);
 
             const currentLevel = CONFIG.levels[level - 1];
             const nextLevel = CONFIG.levels[level];
@@ -724,11 +709,6 @@
                         const timeSinceLastCollect = Date.now() - lastCollectTime;
                         const gemsToProduce = Math.floor(timeSinceLastCollect / (currentLevel.productionTime * 1000));
                         const newStorage = Math.min(current + 0.01, currentLevel.maxStorage); // Smooth increment
-
-                        // Spawn particles occasionally
-                        if (Math.random() < 0.1 && mineRef.current) {
-                            spawnParticle();
-                        }
 
                         return newStorage;
                     });
@@ -757,32 +737,11 @@
                 return () => clearInterval(interval);
             }, []);
 
-            const spawnParticle = () => {
-                if (!mineRef.current) return;
-
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.textContent = '💎';
-                particle.style.left = `${Math.random() * 80 + 10}%`;
-                particle.style.bottom = '20px';
-
-                mineRef.current.appendChild(particle);
-
-                setTimeout(() => {
-                    particle.remove();
-                }, 3000);
-            };
-
             const collectMine = () => {
                 const amount = Math.floor(mineStorage);
                 setGems(g => g + amount);
                 setMineStorage(0);
                 setLastCollectTime(Date.now());
-
-                // Spawn collection particles
-                for (let i = 0; i < 5; i++) {
-                    setTimeout(() => spawnParticle(), i * 100);
-                }
             };
 
             const handleUpgrade = () => {
@@ -883,7 +842,7 @@
                     </div>
 
                     {/* Gem Mine Section */}
-                    <div className="mine-section" ref={mineRef}>
+                    <div className="mine-section">
                         <div className="mine-title">Gem Mine Vault</div>
                         <div className="mine-vault">
                             <div className="vault-content">
