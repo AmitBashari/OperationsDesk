@@ -299,9 +299,9 @@
 
         .upgrade-progress-container {
             position: relative;
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 12px auto;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 8px auto;
         }
 
         .upgrade-progress-ring {
@@ -311,13 +311,13 @@
         .upgrade-progress-bg {
             fill: none;
             stroke: #e0e0e0;
-            stroke-width: 8;
+            stroke-width: 6;
         }
 
         .upgrade-progress-bar {
             fill: none;
             stroke: #7c3aed;
-            stroke-width: 8;
+            stroke-width: 6;
             stroke-linecap: round;
             transition: stroke-dashoffset 0.3s ease;
         }
@@ -327,7 +327,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 14px;
+            font-size: 10px;
             font-weight: bold;
             color: #7c3aed;
         }
@@ -1166,6 +1166,9 @@
             const [speedupTickets, setSpeedupTickets] = useState(10);
             const [upgradeTimer, setUpgradeTimer] = useState(null);
             const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
+            const [showTicketModal, setShowTicketModal] = useState(false);
+            const [ticketAmount, setTicketAmount] = useState(1);
+            const [showGemConfirm, setShowGemConfirm] = useState(false);
             const particleIdRef = useRef(0);
 
             const currentLevel = CONFIG.levels[level - 1];
@@ -1298,21 +1301,45 @@
                 spawnParticles(207, 400, 20, '⭐');
             };
 
-            const speedUpWithTickets = () => {
+            const openTicketModal = () => {
                 if (!upgradeTimer || speedupTickets < 1) return;
 
                 const remainingTime = Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000);
                 const ticketsNeeded = Math.ceil(remainingTime / 300); // 5 minutes per ticket
+                const maxTickets = Math.min(speedupTickets, ticketsNeeded);
 
-                if (speedupTickets >= ticketsNeeded) {
-                    setSpeedupTickets(t => t - ticketsNeeded);
-                    completeUpgrade();
-                } else {
-                    showTooltip(`Need ${ticketsNeeded} tickets`);
-                }
+                setTicketAmount(maxTickets);
+                setShowTicketModal(true);
             };
 
-            const speedUpWithGems = () => {
+            const confirmTicketSpeedup = () => {
+                if (!upgradeTimer || ticketAmount < 1 || speedupTickets < ticketAmount) return;
+
+                const timeReduction = ticketAmount * 300 * 1000; // 5 minutes per ticket in ms
+                const newEndTime = upgradeTimer.endTime - timeReduction;
+
+                setSpeedupTickets(t => t - ticketAmount);
+
+                if (newEndTime <= Date.now()) {
+                    // Complete immediately if time reduction exceeds remaining time
+                    completeUpgrade();
+                } else {
+                    // Update timer with reduced time
+                    setUpgradeTimer({
+                        ...upgradeTimer,
+                        endTime: newEndTime
+                    });
+                }
+
+                setShowTicketModal(false);
+            };
+
+            const openGemConfirm = () => {
+                if (!upgradeTimer) return;
+                setShowGemConfirm(true);
+            };
+
+            const confirmGemSpeedup = () => {
                 if (!upgradeTimer) return;
 
                 const remainingTime = Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000 / 60); // in minutes
@@ -1321,8 +1348,10 @@
                 if (gems >= gemCost) {
                     setGems(g => g - gemCost);
                     completeUpgrade();
+                    setShowGemConfirm(false);
                 } else {
                     showTooltip(`Need ${gemCost} gems`);
+                    setShowGemConfirm(false);
                 }
             };
 
@@ -1431,23 +1460,25 @@
                 const upgradeRemaining = upgradeTimer ? Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000) : 0;
                 const upgradeTotal = upgradeTimer ? (upgradeTimer.endTime - upgradeTimer.startTime) / 1000 : 0;
                 const upgradeProgress = upgradeTotal > 0 ? ((upgradeTotal - upgradeRemaining) / upgradeTotal) * 100 : 0;
-                const circumference = 2 * Math.PI * 42;
+                const circumference = 2 * Math.PI * 26;
 
                 return (
                     <div className="trove-level-section">
                         <div className="trove-level-title">Primal Trove Level</div>
-                        <div className="level-text">Level {level}</div>
+                        <div className="level-text">
+                            {upgradeTimer ? `Level ${level}→${upgradeTimer.targetLevel}` : `Level ${level}`}
+                        </div>
 
                         {upgradeTimer ? (
                             <div className="upgrade-timer">
                                 <div className="upgrade-progress-container">
-                                    <svg className="upgrade-progress-ring" width="100" height="100">
-                                        <circle className="upgrade-progress-bg" cx="50" cy="50" r="42" />
+                                    <svg className="upgrade-progress-ring" width="60" height="60">
+                                        <circle className="upgrade-progress-bg" cx="30" cy="30" r="26" />
                                         <circle
                                             className="upgrade-progress-bar"
-                                            cx="50"
-                                            cy="50"
-                                            r="42"
+                                            cx="30"
+                                            cy="30"
+                                            r="26"
                                             strokeDasharray={circumference}
                                             strokeDashoffset={circumference - (upgradeProgress / 100) * circumference}
                                         />
@@ -1459,14 +1490,14 @@
                                 <div className="speedup-buttons">
                                     <button
                                         className="speedup-button primary"
-                                        onClick={speedUpWithTickets}
+                                        onClick={openTicketModal}
                                         disabled={speedupTickets < 1}
                                     >
                                         🎫 Use Tickets
                                     </button>
                                     <button
                                         className="speedup-button"
-                                        onClick={speedUpWithGems}
+                                        onClick={openGemConfirm}
                                     >
                                         💎 Use Gems
                                     </button>
@@ -1766,6 +1797,69 @@
                                     </button>
                                     <button className="modal-button primary" onClick={confirmUpgrade}>
                                         Start Upgrade
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Ticket Speed Up Modal */}
+                    {showTicketModal && upgradeTimer && (
+                        <div className="modal-overlay" onClick={() => setShowTicketModal(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">Speed Up with Tickets</div>
+                                <div className="modal-message">
+                                    <div style={{marginBottom: '16px'}}>
+                                        Each ticket reduces upgrade time by 5 minutes.
+                                    </div>
+                                    <div style={{marginBottom: '8px'}}>
+                                        Use {ticketAmount} {ticketAmount === 1 ? 'ticket' : 'tickets'}
+                                    </div>
+                                    <input
+                                        type="range"
+                                        className="investment-slider"
+                                        min="1"
+                                        max={Math.min(speedupTickets, Math.ceil(Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000) / 300))}
+                                        step="1"
+                                        value={ticketAmount}
+                                        onChange={(e) => setTicketAmount(parseInt(e.target.value))}
+                                    />
+                                    <div style={{fontSize: '12px', color: '#888', marginTop: '8px'}}>
+                                        Time reduction: {Math.floor(ticketAmount * 5)}m
+                                    </div>
+                                    <div style={{fontSize: '12px', color: '#888'}}>
+                                        Remaining after: {formatTime(Math.max(0, ((upgradeTimer.endTime - Date.now()) / 1000) - (ticketAmount * 300)))}
+                                    </div>
+                                </div>
+                                <div className="modal-actions">
+                                    <button className="modal-button" onClick={() => setShowTicketModal(false)}>
+                                        Cancel
+                                    </button>
+                                    <button className="modal-button primary" onClick={confirmTicketSpeedup}>
+                                        Use {ticketAmount} {ticketAmount === 1 ? 'Ticket' : 'Tickets'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Gem Speed Up Confirmation Modal */}
+                    {showGemConfirm && upgradeTimer && (
+                        <div className="modal-overlay" onClick={() => setShowGemConfirm(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">Speed Up with Gems</div>
+                                <div className="modal-message">
+                                    Spend {Math.ceil(Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000 / 60) * 10)} 💎 to complete the upgrade instantly?
+                                    <div style={{fontSize: '12px', color: '#888', marginTop: '8px'}}>
+                                        (10 gems per minute remaining)
+                                    </div>
+                                </div>
+                                <div className="modal-actions">
+                                    <button className="modal-button" onClick={() => setShowGemConfirm(false)}>
+                                        Cancel
+                                    </button>
+                                    <button className="modal-button primary" onClick={confirmGemSpeedup}>
+                                        Confirm
                                     </button>
                                 </div>
                             </div>
