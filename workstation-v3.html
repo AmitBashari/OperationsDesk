@@ -48,10 +48,11 @@
         .top-bar {
             background: #ffffff;
             border-bottom: 1px solid #e0e0e0;
-            padding: 12px 16px;
+            padding: 12px 60px 12px 16px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
+            gap: 12px;
             flex-shrink: 0;
             position: relative;
         }
@@ -62,11 +63,12 @@
             right: 16px;
             width: 32px;
             height: 32px;
-            background: #e0e0e0;
+            background: #ef4444;
             border: none;
             border-radius: 8px;
             font-size: 18px;
             font-weight: bold;
+            color: #fff;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -75,16 +77,33 @@
         }
 
         .close-feature-button:active {
-            background: #d0d0d0;
+            background: #dc2626;
         }
 
         .gem-balance {
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #000;
+        }
+
+        .speedup-tickets {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            background: #fef3c7;
+            padding: 6px 12px;
+            border-radius: 16px;
+            border: 2px solid #fbbf24;
+        }
+
+        .ticket-icon {
+            font-size: 18px;
         }
 
         .gem-icon {
@@ -193,8 +212,14 @@
             color: #fff;
         }
 
-        .tab-button:active:not(.active) {
+        .tab-button:active:not(.active):not(.disabled) {
             background: #e0e0e0;
+        }
+
+        .tab-button.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
         }
 
         .lock-icon {
@@ -219,14 +244,22 @@
             line-height: 1.4;
         }
 
-        /* Gem Mine Tab */
-        .level-display {
+        /* Trove Level Section */
+        .trove-level-section {
             background: #fff;
             border: 2px solid #c0c0c0;
             border-radius: 12px;
             padding: 16px;
-            margin-bottom: 16px;
+            margin-top: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .trove-level-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #7c3aed;
             text-align: center;
+            margin-bottom: 12px;
         }
 
         .level-text {
@@ -234,6 +267,7 @@
             font-weight: bold;
             color: #000;
             margin-bottom: 12px;
+            text-align: center;
         }
 
         .upgrade-button {
@@ -256,6 +290,78 @@
         .upgrade-button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        .upgrade-timer {
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .upgrade-progress-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 12px auto;
+        }
+
+        .upgrade-progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .upgrade-progress-bg {
+            fill: none;
+            stroke: #e0e0e0;
+            stroke-width: 8;
+        }
+
+        .upgrade-progress-bar {
+            fill: none;
+            stroke: #7c3aed;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+
+        .upgrade-time-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #7c3aed;
+        }
+
+        .speedup-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .speedup-button {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #c0c0c0;
+            border-radius: 20px;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .speedup-button:active {
+            background: #e0e0e0;
+        }
+
+        .speedup-button.primary {
+            background: #fef3c7;
+            border-color: #fbbf24;
+        }
+
+        .speedup-button.primary:active {
+            background: #fde68a;
         }
 
         .production-section {
@@ -1057,6 +1163,9 @@
             const [tooltip, setTooltip] = useState(null);
             const [particles, setParticles] = useState([]);
             const [showLevelUp, setShowLevelUp] = useState(false);
+            const [speedupTickets, setSpeedupTickets] = useState(10);
+            const [upgradeTimer, setUpgradeTimer] = useState(null);
+            const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
             const particleIdRef = useRef(0);
 
             const currentLevel = CONFIG.levels[level - 1];
@@ -1104,6 +1213,19 @@
                 }
             }, [showLevelInfo, level]);
 
+            // Check upgrade timer completion
+            useEffect(() => {
+                if (!upgradeTimer) return;
+
+                const interval = setInterval(() => {
+                    if (Date.now() >= upgradeTimer.endTime) {
+                        completeUpgrade();
+                    }
+                }, 1000);
+
+                return () => clearInterval(interval);
+            }, [upgradeTimer]);
+
             const spawnParticles = (x, y, count = 10, emoji = '💎') => {
                 const newParticles = [];
                 for (let i = 0; i < count; i++) {
@@ -1138,19 +1260,70 @@
                 }
             };
 
-            const handleUpgrade = () => {
-                if (!nextLevel || gems < currentLevel.upgradeCost) return;
-                setGems(g => g - currentLevel.upgradeCost);
-                const newLevel = level + 1;
-                setLevel(newLevel);
+            const calculateUpgradeTime = (level) => {
+                // 1h base + 30min per level (in seconds)
+                return 3600 + (level * 1800);
+            };
 
-                // Show level up animation with duration based on level
-                const duration = 2000 + (newLevel * 200); // Starts at 2.2s for level 2, increases by 0.2s per level
+            const handleUpgradeClick = () => {
+                if (!nextLevel || gems < currentLevel.upgradeCost || upgradeTimer) return;
+                setShowUpgradeConfirm(true);
+            };
+
+            const confirmUpgrade = () => {
+                if (!nextLevel || gems < currentLevel.upgradeCost) return;
+
+                setGems(g => g - currentLevel.upgradeCost);
+                const upgradeTime = calculateUpgradeTime(level);
+                setUpgradeTimer({
+                    startTime: Date.now(),
+                    endTime: Date.now() + (upgradeTime * 1000),
+                    targetLevel: level + 1
+                });
+                setShowUpgradeConfirm(false);
+            };
+
+            const completeUpgrade = () => {
+                if (!upgradeTimer) return;
+                const newLevel = upgradeTimer.targetLevel;
+                setLevel(newLevel);
+                setUpgradeTimer(null);
+
+                // Show level up animation
+                const duration = 2000 + (newLevel * 200);
                 setShowLevelUp(true);
                 setTimeout(() => setShowLevelUp(false), duration);
 
                 // Spawn level up particles
                 spawnParticles(207, 400, 20, '⭐');
+            };
+
+            const speedUpWithTickets = () => {
+                if (!upgradeTimer || speedupTickets < 1) return;
+
+                const remainingTime = Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000);
+                const ticketsNeeded = Math.ceil(remainingTime / 300); // 5 minutes per ticket
+
+                if (speedupTickets >= ticketsNeeded) {
+                    setSpeedupTickets(t => t - ticketsNeeded);
+                    completeUpgrade();
+                } else {
+                    showTooltip(`Need ${ticketsNeeded} tickets`);
+                }
+            };
+
+            const speedUpWithGems = () => {
+                if (!upgradeTimer) return;
+
+                const remainingTime = Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000 / 60); // in minutes
+                const gemCost = Math.ceil(remainingTime * 10); // 10 gems per minute
+
+                if (gems >= gemCost) {
+                    setGems(g => g - gemCost);
+                    completeUpgrade();
+                } else {
+                    showTooltip(`Need ${gemCost} gems`);
+                }
             };
 
             const openDepositDetail = (deposit) => {
@@ -1247,9 +1420,79 @@
                     });
                     return updated;
                 });
+                if (upgradeTimer) {
+                    completeUpgrade();
+                }
             };
 
             const storagePercent = (mineStorage / currentLevel.maxStorage) * 100;
+
+            const renderTroveLevelSection = () => {
+                const upgradeRemaining = upgradeTimer ? Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000) : 0;
+                const upgradeTotal = upgradeTimer ? (upgradeTimer.endTime - upgradeTimer.startTime) / 1000 : 0;
+                const upgradeProgress = upgradeTotal > 0 ? ((upgradeTotal - upgradeRemaining) / upgradeTotal) * 100 : 0;
+                const circumference = 2 * Math.PI * 42;
+
+                return (
+                    <div className="trove-level-section">
+                        <div className="trove-level-title">Primal Trove Level</div>
+                        <div className="level-text">Level {level}</div>
+
+                        {upgradeTimer ? (
+                            <div className="upgrade-timer">
+                                <div className="upgrade-progress-container">
+                                    <svg className="upgrade-progress-ring" width="100" height="100">
+                                        <circle className="upgrade-progress-bg" cx="50" cy="50" r="42" />
+                                        <circle
+                                            className="upgrade-progress-bar"
+                                            cx="50"
+                                            cy="50"
+                                            r="42"
+                                            strokeDasharray={circumference}
+                                            strokeDashoffset={circumference - (upgradeProgress / 100) * circumference}
+                                        />
+                                    </svg>
+                                    <div className="upgrade-time-text">
+                                        {formatTime(upgradeRemaining)}
+                                    </div>
+                                </div>
+                                <div className="speedup-buttons">
+                                    <button
+                                        className="speedup-button primary"
+                                        onClick={speedUpWithTickets}
+                                        disabled={speedupTickets < 1}
+                                    >
+                                        🎫 Use Tickets
+                                    </button>
+                                    <button
+                                        className="speedup-button"
+                                        onClick={speedUpWithGems}
+                                    >
+                                        💎 Use Gems
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                {nextLevel && (
+                                    <button
+                                        className="upgrade-button"
+                                        onClick={handleUpgradeClick}
+                                        disabled={gems < currentLevel.upgradeCost}
+                                    >
+                                        {gems < currentLevel.upgradeCost
+                                            ? `Need ${currentLevel.upgradeCost} 💎`
+                                            : `Upgrade to Level ${nextLevel.level} (${currentLevel.upgradeCost} 💎)`}
+                                    </button>
+                                )}
+                                {!nextLevel && (
+                                    <div style={{color: '#10b981', fontWeight: 'bold'}}>MAX LEVEL</div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                );
+            };
 
             return (
                 <>
@@ -1258,6 +1501,10 @@
                         <div className="gem-balance">
                             <span className="gem-icon">💎</span>
                             <span>{gems.toLocaleString()}</span>
+                        </div>
+                        <div className="speedup-tickets">
+                            <span className="ticket-icon">🎫</span>
+                            <span>{speedupTickets}</span>
                         </div>
                         <div className="level-info" onClick={() => setShowLevelInfo(true)}>
                             <span>Level {level}</span>
@@ -1297,11 +1544,8 @@
                                 )}
                             </button>
                             <button
-                                className={`tab-button ${activeTab === 'upgrades' ? 'active' : ''}`}
-                                onClick={() => {
-                                    setActiveTab('upgrades');
-                                    showTooltip('Coming Soon');
-                                }}
+                                className="tab-button disabled"
+                                onClick={() => showTooltip('Coming Soon')}
                             >
                                 Upgrades <span className="lock-icon">🔒</span>
                             </button>
@@ -1313,23 +1557,6 @@
                                 <>
                                     <div className="tab-description">
                                         Harvest gems passively over time. Collect and upgrade to increase production.
-                                    </div>
-                                    <div className="level-display">
-                                        <div className="level-text">Level {level}</div>
-                                        {nextLevel && (
-                                            <button
-                                                className="upgrade-button"
-                                                onClick={handleUpgrade}
-                                                disabled={gems < currentLevel.upgradeCost}
-                                            >
-                                                {gems < currentLevel.upgradeCost
-                                                    ? `Need ${currentLevel.upgradeCost} 💎`
-                                                    : `Upgrade (${currentLevel.upgradeCost} 💎)`}
-                                            </button>
-                                        )}
-                                        {!nextLevel && (
-                                            <div style={{color: '#10b981', fontWeight: 'bold'}}>MAX LEVEL</div>
-                                        )}
                                     </div>
 
                                     <div className="production-section">
@@ -1352,6 +1579,8 @@
                                                 : `Time until full: ${getTimeUntilFull()}`}
                                         </div>
                                     </div>
+
+                                    {renderTroveLevelSection()}
                                 </>
                             )}
 
@@ -1409,6 +1638,8 @@
                                         );
                                     })}
                                     </div>
+
+                                    {renderTroveLevelSection()}
                                 </>
                             )}
 
@@ -1505,7 +1736,7 @@
                     {showConfirmation && (
                         <div className="modal-overlay" onClick={() => setShowConfirmation(false)}>
                             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                                <div className="modal-title">Confirmation Deposit</div>
+                                <div className="modal-title">Confirm Deposit</div>
                                 <div className="modal-message">
                                     Deposited Gems cannot be withdrawn before Deposit Time ends
                                 </div>
@@ -1515,6 +1746,26 @@
                                     </button>
                                     <button className="modal-button primary" onClick={executeDeposit}>
                                         Confirm
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Upgrade Confirmation Modal */}
+                    {showUpgradeConfirm && (
+                        <div className="modal-overlay" onClick={() => setShowUpgradeConfirm(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">Confirm Upgrade</div>
+                                <div className="modal-message">
+                                    Upgrade to Level {nextLevel?.level} will cost {currentLevel.upgradeCost} 💎 and take {formatTime(calculateUpgradeTime(level))} to complete. You can still collect gems and make deposits during the upgrade.
+                                </div>
+                                <div className="modal-actions">
+                                    <button className="modal-button" onClick={() => setShowUpgradeConfirm(false)}>
+                                        Cancel
+                                    </button>
+                                    <button className="modal-button primary" onClick={confirmUpgrade}>
+                                        Start Upgrade
                                     </button>
                                 </div>
                             </div>
