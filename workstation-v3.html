@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Primal Trove - Workstation V3</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #1a1a1a;
+            color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Portrait Container - Centers on Desktop */
+        .portrait-container {
+            width: 100%;
+            max-width: 414px;
+            height: 100vh;
+            background: #f5f5f5;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+        }
+
+        #root {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .gem-balance {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .gem-icon {
+            font-size: 20px;
+        }
+
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #e0e0e0;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .level-info:active {
+            background: #d0d0d0;
+        }
+
+        .info-icon {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        /* Scrollable Content */
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: #d0d0d0;
+            padding: 24px 16px;
+            text-align: center;
+            border-bottom: 1px solid #c0c0c0;
+        }
+
+        .hero-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 16px;
+        }
+
+        .image-placeholder {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+            background: #a0a0a0;
+            border: 2px solid #808080;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #505050;
+            font-weight: 500;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 10px 12px;
+            border: 2px solid #c0c0c0;
+            border-radius: 8px;
+            background: #f5f5f5;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .tab-button.active {
+            background: #7c3aed;
+            border-color: #6d28d9;
+            color: #fff;
+        }
+
+        .tab-button:active:not(.active) {
+            background: #e0e0e0;
+        }
+
+        .lock-icon {
+            font-size: 14px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            padding: 16px;
+            flex: 1;
+        }
+
+        /* Gem Mine Tab */
+        .level-display {
+            background: #fff;
+            border: 2px solid #c0c0c0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .level-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 12px;
+        }
+
+        .upgrade-button {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #c0c0c0;
+            border-radius: 24px;
+            background: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upgrade-button:active:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .upgrade-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .production-section {
+            background: #fff;
+            border: 2px solid #c0c0c0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .production-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .production-rate {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .collect-button {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #c0c0c0;
+            border-radius: 24px;
+            background: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+
+        .collect-button:active:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .collect-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .time-until-full {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        /* Investments Tab */
+        .deposits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .deposit-card {
+            background: #fff;
+            border: 3px solid #c0c0c0;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            min-height: 140px;
+        }
+
+        .deposit-card.locked {
+            opacity: 0.6;
+        }
+
+        .deposit-card.active {
+            border-color: #7c3aed;
+        }
+
+        .deposit-card.completed {
+            border-color: #10b981;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .deposit-card:active:not(.locked) {
+            background: #f5f5f5;
+        }
+
+        .deposit-icon {
+            width: 48px;
+            height: 48px;
+            background: #d0d0d0;
+            border: 2px solid #a0a0a0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .deposit-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+            text-align: center;
+        }
+
+        .deposit-lock-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: #666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .deposit-timer {
+            font-size: 12px;
+            color: #7c3aed;
+            font-weight: 600;
+        }
+
+        .deposit-progress {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .deposit-progress-bar {
+            height: 100%;
+            background: #7c3aed;
+            transition: width 1s linear;
+        }
+
+        /* Deposit Detail View */
+        .deposit-detail {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 100%;
+            background: #f5f5f5;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%) translateX(-50%); }
+            to { transform: translateX(-50%); }
+        }
+
+        .detail-header {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-button {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-button:active {
+            background: #d0d0d0;
+        }
+
+        .detail-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .detail-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .detail-hero {
+            background: #d0d0d0;
+            border: 2px solid #c0c0c0;
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .detail-hero-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            background: #a0a0a0;
+            border: 2px solid #808080;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .detail-info {
+            background: #fff;
+            border: 2px solid #c0c0c0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .investment-input {
+            background: #fff;
+            border: 2px solid #c0c0c0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .input-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #000;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .investment-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .investment-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #000;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .investment-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #000;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .expected-payout {
+            background: #e8f5e9;
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .payout-label {
+            font-size: 12px;
+            color: #059669;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .payout-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #10b981;
+            text-align: center;
+        }
+
+        .deposit-action-button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 24px;
+            background: #000;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .deposit-action-button:active {
+            background: #333;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: #fff;
+            border: 2px solid #c0c0c0;
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 320px;
+            animation: scaleIn 0.2s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .modal-message {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #c0c0c0;
+            border-radius: 24px;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-button.primary {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .modal-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Floating Tooltip */
+        .floating-tooltip {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 400;
+            animation: tooltipFade 2s ease forwards;
+            max-width: 280px;
+            text-align: center;
+        }
+
+        @keyframes tooltipFade {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            10% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            90% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            padding: 8px 16px 12px 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .bottom-icon {
+            width: 48px;
+            height: 48px;
+            background: #e0e0e0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .bottom-icon.camping {
+            background: #d0d0d0;
+            flex-direction: column;
+            font-size: 20px;
+            padding: 4px;
+        }
+
+        .bottom-icon.camping span {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .bottom-icon:active {
+            background: #c0c0c0;
+        }
+
+        /* Level Info Modal */
+        .level-info-modal {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .level-info-content {
+            background: #fff;
+            border: 2px solid #c0c0c0;
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 360px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: scaleIn 0.2s ease;
+        }
+
+        .level-info-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .level-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f9f9f9;
+        }
+
+        .level-item.current {
+            border-color: #7c3aed;
+            background: #f3e8ff;
+        }
+
+        .level-header {
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .level-stats {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .close-button {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #c0c0c0;
+            border-radius: 24px;
+            background: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
+        .close-button:active {
+            background: #e0e0e0;
+        }
+
+        /* Debug Button */
+        .debug-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 8px 12px;
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="portrait-container">
+        <div id="root"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Configuration
+        const CONFIG = {
+            levels: [
+                { level: 1, maxStorage: 10, productionTime: 18000, upgradeCost: 500, depositBonus: 0 },      // 5h
+                { level: 2, maxStorage: 20, productionTime: 14400, upgradeCost: 600, depositBonus: 0.02 },  // 4h
+                { level: 3, maxStorage: 30, productionTime: 10800, upgradeCost: 700, depositBonus: 0.04 },  // 3h - Unlock 7-day
+                { level: 4, maxStorage: 40, productionTime: 9000, upgradeCost: 800, depositBonus: 0.06 },   // 2.5h
+                { level: 5, maxStorage: 50, productionTime: 7200, upgradeCost: 900, depositBonus: 0.08 },   // 2h - Unlock 14-day
+                { level: 6, maxStorage: 60, productionTime: 5400, upgradeCost: 1000, depositBonus: 0.10 },  // 1.5h
+                { level: 7, maxStorage: 70, productionTime: 3600, upgradeCost: 1100, depositBonus: 0.12 },  // 1h - Unlock 30-day
+                { level: 8, maxStorage: 80, productionTime: 2700, upgradeCost: 1200, depositBonus: 0.14 },  // 45min
+                { level: 9, maxStorage: 90, productionTime: 1800, upgradeCost: 1300, depositBonus: 0.16 },  // 30min - Unlock 60-day
+                { level: 10, maxStorage: 100, productionTime: 900, upgradeCost: null, depositBonus: 0.20 }, // 15min
+            ],
+            deposits: [
+                { id: '7day', name: '7-Day', duration: 7, baseInterest: 0.15, unlockLevel: 3, icon: '⛰️' },
+                { id: '14day', name: '14-Day', duration: 14, baseInterest: 0.35, unlockLevel: 5, icon: '🏔️' },
+                { id: '30day', name: '30-Day', duration: 30, baseInterest: 0.70, unlockLevel: 7, icon: '🗻' },
+                { id: '60day', name: '60-Day', duration: 60, baseInterest: 1.20, unlockLevel: 9, icon: '⚡' },
+            ],
+            startingGems: 10000,
+            startingLevel: 1,
+        };
+
+        function App() {
+            const [gems, setGems] = useState(CONFIG.startingGems);
+            const [level, setLevel] = useState(CONFIG.startingLevel);
+            const [mineStorage, setMineStorage] = useState(0);
+            const [lastCollectTime, setLastCollectTime] = useState(Date.now());
+            const [activeTab, setActiveTab] = useState('mine');
+            const [activeDeposits, setActiveDeposits] = useState({});
+            const [showLevelInfo, setShowLevelInfo] = useState(false);
+            const [selectedDeposit, setSelectedDeposit] = useState(null);
+            const [investAmount, setInvestAmount] = useState(100);
+            const [showConfirmation, setShowConfirmation] = useState(false);
+            const [tooltip, setTooltip] = useState(null);
+
+            const currentLevel = CONFIG.levels[level - 1];
+            const nextLevel = CONFIG.levels[level];
+
+            // Mine production
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setMineStorage(current => {
+                        return Math.min(current + 0.01, currentLevel.maxStorage);
+                    });
+                }, 100);
+
+                return () => clearInterval(interval);
+            }, [currentLevel]);
+
+            // Update deposit timers
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setActiveDeposits(current => {
+                        const updated = { ...current };
+                        Object.keys(updated).forEach(key => {
+                            if (updated[key] && updated[key].endTime) {
+                                if (Date.now() >= updated[key].endTime) {
+                                    updated[key].completed = true;
+                                }
+                            }
+                        });
+                        return updated;
+                    });
+                }, 1000);
+
+                return () => clearInterval(interval);
+            }, []);
+
+            const collectMine = () => {
+                const amount = Math.floor(mineStorage);
+                setGems(g => g + amount);
+                setMineStorage(0);
+                setLastCollectTime(Date.now());
+            };
+
+            const handleUpgrade = () => {
+                if (!nextLevel || gems < currentLevel.upgradeCost) return;
+                setGems(g => g - currentLevel.upgradeCost);
+                setLevel(l => l + 1);
+            };
+
+            const openDepositDetail = (deposit) => {
+                if (level < deposit.unlockLevel) {
+                    showTooltip(`Unlock at Level ${deposit.unlockLevel}`);
+                    return;
+                }
+                if (activeDeposits[deposit.id]) return; // Already active
+                setSelectedDeposit(deposit);
+                setInvestAmount(Math.min(100, gems));
+            };
+
+            const confirmDeposit = () => {
+                setShowConfirmation(true);
+            };
+
+            const executeDeposit = () => {
+                if (investAmount > gems) return;
+
+                const deposit = CONFIG.deposits.find(d => d.id === selectedDeposit.id);
+                setGems(g => g - investAmount);
+                setActiveDeposits({
+                    ...activeDeposits,
+                    [deposit.id]: {
+                        amount: investAmount,
+                        startTime: Date.now(),
+                        endTime: Date.now() + deposit.duration * 24 * 60 * 60 * 1000,
+                        completed: false,
+                    }
+                });
+                setShowConfirmation(false);
+                setSelectedDeposit(null);
+            };
+
+            const collectDeposit = (depositId) => {
+                const deposit = CONFIG.deposits.find(d => d.id === depositId);
+                const active = activeDeposits[depositId];
+                if (!active || !active.completed) return;
+
+                const totalInterest = deposit.baseInterest + currentLevel.depositBonus;
+                const payout = Math.floor(active.amount * (1 + totalInterest));
+                setGems(g => g + payout);
+
+                const updated = { ...activeDeposits };
+                delete updated[depositId];
+                setActiveDeposits(updated);
+            };
+
+            const showTooltip = (message) => {
+                setTooltip(message);
+                setTimeout(() => setTooltip(null), 2000);
+            };
+
+            const formatTime = (seconds) => {
+                const d = Math.floor(seconds / 86400);
+                const h = Math.floor((seconds % 86400) / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = Math.floor(seconds % 60);
+
+                if (d > 0) return `${d}d ${h}h ${m}m ${s}s`;
+                if (h > 0) return `${h}h ${m}m ${s}s`;
+                if (m > 0) return `${m}m ${s}s`;
+                return `${s}s`;
+            };
+
+            const formatProductionTime = (seconds) => {
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                if (h > 0) return `${h}h ${m}m`;
+                return `${m}m`;
+            };
+
+            const getTimeUntilFull = () => {
+                const remaining = currentLevel.maxStorage - mineStorage;
+                const secondsRemaining = remaining * currentLevel.productionTime;
+                return formatTime(secondsRemaining);
+            };
+
+            const skipTime = () => {
+                setMineStorage(currentLevel.maxStorage);
+                setActiveDeposits(current => {
+                    const updated = { ...current };
+                    Object.keys(updated).forEach(key => {
+                        if (updated[key]) {
+                            updated[key].completed = true;
+                            updated[key].endTime = Date.now();
+                        }
+                    });
+                    return updated;
+                });
+            };
+
+            const storagePercent = (mineStorage / currentLevel.maxStorage) * 100;
+
+            return (
+                <>
+                    {/* Top Bar */}
+                    <div className="top-bar">
+                        <div className="gem-balance">
+                            <span className="gem-icon">💎</span>
+                            <span>{gems.toLocaleString()}</span>
+                        </div>
+                        <div className="level-info" onClick={() => setShowLevelInfo(true)}>
+                            <span>Level {level}</span>
+                            <div className="info-icon">i</div>
+                        </div>
+                    </div>
+
+                    {/* Scrollable Content */}
+                    <div className="scrollable-content">
+                        {/* Hero Section */}
+                        <div className="hero-section">
+                            <div className="hero-title">Primal Trove</div>
+                            <div className="image-placeholder">Image Placeholder</div>
+                        </div>
+
+                        {/* Tab Navigation */}
+                        <div className="tab-navigation">
+                            <button
+                                className={`tab-button ${activeTab === 'mine' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('mine')}
+                            >
+                                Gem Mine
+                            </button>
+                            <button
+                                className={`tab-button ${activeTab === 'investments' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('investments')}
+                            >
+                                Investments
+                            </button>
+                            <button
+                                className={`tab-button ${activeTab === 'upgrades' ? 'active' : ''}`}
+                                onClick={() => {
+                                    setActiveTab('upgrades');
+                                    showTooltip('Coming Soon');
+                                }}
+                            >
+                                Upgrades <span className="lock-icon">🔒</span>
+                            </button>
+                        </div>
+
+                        {/* Tab Content */}
+                        <div className="tab-content">
+                            {activeTab === 'mine' && (
+                                <>
+                                    <div className="level-display">
+                                        <div className="level-text">Level {level}</div>
+                                        {nextLevel && (
+                                            <button
+                                                className="upgrade-button"
+                                                onClick={handleUpgrade}
+                                                disabled={gems < currentLevel.upgradeCost}
+                                            >
+                                                {gems < currentLevel.upgradeCost
+                                                    ? `Need ${currentLevel.upgradeCost} 💎`
+                                                    : `Upgrade (${currentLevel.upgradeCost} 💎)`}
+                                            </button>
+                                        )}
+                                        {!nextLevel && (
+                                            <div style={{color: '#10b981', fontWeight: 'bold'}}>MAX LEVEL</div>
+                                        )}
+                                    </div>
+
+                                    <div className="production-section">
+                                        <div className="production-title">
+                                            Gem Production: {Math.floor(mineStorage)}/{currentLevel.maxStorage}
+                                        </div>
+                                        <div className="production-rate">
+                                            Rate: 1 Gem every {formatProductionTime(currentLevel.productionTime)}
+                                        </div>
+                                        <button
+                                            className="collect-button"
+                                            onClick={collectMine}
+                                            disabled={mineStorage < 1}
+                                        >
+                                            Collect
+                                        </button>
+                                        <div className="time-until-full">
+                                            Time until full: {getTimeUntilFull()}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {activeTab === 'investments' && (
+                                <div className="deposits-grid">
+                                    {CONFIG.deposits.map(deposit => {
+                                        const isLocked = level < deposit.unlockLevel;
+                                        const active = activeDeposits[deposit.id];
+                                        const isCompleted = active?.completed;
+
+                                        let timeRemaining = 0;
+                                        let progress = 0;
+                                        if (active && !isCompleted) {
+                                            timeRemaining = Math.max(0, (active.endTime - Date.now()) / 1000);
+                                            const totalTime = deposit.duration * 24 * 60 * 60;
+                                            progress = ((totalTime - timeRemaining) / totalTime) * 100;
+                                        }
+
+                                        return (
+                                            <div
+                                                key={deposit.id}
+                                                className={`deposit-card ${isLocked ? 'locked' : ''} ${active ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                                                onClick={() => {
+                                                    if (isCompleted) {
+                                                        collectDeposit(deposit.id);
+                                                    } else if (!active) {
+                                                        openDepositDetail(deposit);
+                                                    }
+                                                }}
+                                            >
+                                                <div className="deposit-icon">{deposit.icon}</div>
+                                                <div className="deposit-name">{deposit.name} Deposit</div>
+                                                {isLocked && (
+                                                    <div className="deposit-lock-badge">🔒</div>
+                                                )}
+                                                {active && !isCompleted && (
+                                                    <>
+                                                        <div className="deposit-timer">{formatTime(timeRemaining)}</div>
+                                                        <div className="deposit-progress">
+                                                            <div className="deposit-progress-bar" style={{width: `${progress}%`}}></div>
+                                                        </div>
+                                                    </>
+                                                )}
+                                                {isCompleted && (
+                                                    <div style={{color: '#10b981', fontWeight: 'bold', fontSize: '14px'}}>
+                                                        Collect!
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {activeTab === 'upgrades' && (
+                                <div style={{textAlign: 'center', padding: '40px 20px', color: '#666'}}>
+                                    <div style={{fontSize: '48px', marginBottom: '16px'}}>🔒</div>
+                                    <div style={{fontSize: '18px', fontWeight: 'bold'}}>Coming Soon</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Bottom Bar */}
+                    <div className="bottom-bar">
+                        <div className="bottom-icon">📊</div>
+                        <div className="bottom-icon">⚔️</div>
+                        <div className="bottom-icon camping">
+                            🏕️
+                            <span>Camping</span>
+                        </div>
+                        <div className="bottom-icon">🎯</div>
+                        <div className="bottom-icon">⚙️</div>
+                    </div>
+
+                    {/* Deposit Detail View */}
+                    {selectedDeposit && !showConfirmation && (
+                        <div className="deposit-detail">
+                            <div className="detail-header">
+                                <button className="back-button" onClick={() => setSelectedDeposit(null)}>←</button>
+                                <div className="detail-title">{selectedDeposit.name} Deposit</div>
+                            </div>
+                            <div className="detail-content">
+                                <div className="detail-hero">
+                                    <div className="detail-hero-icon">{selectedDeposit.icon}</div>
+                                </div>
+                                <div className="detail-info">
+                                    <div className="detail-row">
+                                        <span className="detail-label">Deposit Time</span>
+                                        <span className="detail-value">{selectedDeposit.duration} Days</span>
+                                    </div>
+                                    <div className="detail-row">
+                                        <span className="detail-label">Base Interest</span>
+                                        <span className="detail-value">{(selectedDeposit.baseInterest * 100).toFixed(0)}%</span>
+                                    </div>
+                                    <div className="detail-row">
+                                        <span className="detail-label">Level Bonus</span>
+                                        <span className="detail-value">+{(currentLevel.depositBonus * 100).toFixed(0)}%</span>
+                                    </div>
+                                    <div className="detail-row">
+                                        <span className="detail-label">Total Interest</span>
+                                        <span className="detail-value" style={{color: '#10b981'}}>
+                                            {((selectedDeposit.baseInterest + currentLevel.depositBonus) * 100).toFixed(0)}%
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="investment-input">
+                                    <div className="input-label">Investment Amount</div>
+                                    <div className="input-value">{investAmount.toLocaleString()} 💎</div>
+                                    <input
+                                        type="range"
+                                        className="investment-slider"
+                                        min="10"
+                                        max={gems}
+                                        step="10"
+                                        value={investAmount}
+                                        onChange={(e) => setInvestAmount(parseInt(e.target.value))}
+                                    />
+                                </div>
+
+                                <div className="expected-payout">
+                                    <div className="payout-label">Expected Payout</div>
+                                    <div className="payout-value">
+                                        {Math.floor(investAmount * (1 + selectedDeposit.baseInterest + currentLevel.depositBonus)).toLocaleString()} 💎
+                                    </div>
+                                </div>
+
+                                <button className="deposit-action-button" onClick={confirmDeposit}>
+                                    Deposit
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Confirmation Modal */}
+                    {showConfirmation && (
+                        <div className="modal-overlay" onClick={() => setShowConfirmation(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">Confirmation Deposit</div>
+                                <div className="modal-message">
+                                    Deposited Gems cannot be withdrawn before Deposit Time ends
+                                </div>
+                                <div className="modal-actions">
+                                    <button className="modal-button" onClick={() => setShowConfirmation(false)}>
+                                        Cancel
+                                    </button>
+                                    <button className="modal-button primary" onClick={executeDeposit}>
+                                        Confirm
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Level Info Modal */}
+                    {showLevelInfo && (
+                        <div className="level-info-modal" onClick={() => setShowLevelInfo(false)}>
+                            <div className="level-info-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="level-info-title">Level Information</div>
+                                {CONFIG.levels.map((lvl, idx) => (
+                                    <div key={idx} className={`level-item ${lvl.level === level ? 'current' : ''}`}>
+                                        <div className="level-header">Level {lvl.level}</div>
+                                        <div className="level-stats">
+                                            • Storage Cap: {lvl.maxStorage} 💎<br/>
+                                            • Production: 1 💎 every {formatProductionTime(lvl.productionTime)}<br/>
+                                            • Deposit Bonus: +{(lvl.depositBonus * 100).toFixed(0)}%<br/>
+                                            {lvl.upgradeCost && `• Upgrade Cost: ${lvl.upgradeCost} 💎`}
+                                        </div>
+                                    </div>
+                                ))}
+                                <button className="close-button" onClick={() => setShowLevelInfo(false)}>
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Floating Tooltip */}
+                    {tooltip && (
+                        <div className="floating-tooltip">{tooltip}</div>
+                    )}
+
+                    {/* Debug Button */}
+                    <button className="debug-button" onClick={skipTime}>⚡ SKIP</button>
+                </>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
