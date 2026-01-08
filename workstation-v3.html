@@ -30,7 +30,7 @@
             width: 100%;
             max-width: 414px;
             height: 100vh;
-            background: #f5f5f5;
+            background: #f5e6d3;
             position: relative;
             overflow: hidden;
             box-shadow: 0 0 40px rgba(0,0,0,0.5);
@@ -46,8 +46,8 @@
 
         /* Top Bar */
         .top-bar {
-            background: #ffffff;
-            border-bottom: 1px solid #e0e0e0;
+            background: #f5e6d3;
+            border-bottom: 3px solid #8b4513;
             padding: 12px 60px 12px 16px;
             display: flex;
             justify-content: flex-start;
@@ -86,7 +86,11 @@
             gap: 6px;
             font-size: 16px;
             font-weight: bold;
-            color: #000;
+            color: #8b4513;
+            background: #ffd700;
+            padding: 6px 12px;
+            border-radius: 12px;
+            border: 2px solid #8b4513;
         }
 
         .speedup-tickets {
@@ -95,11 +99,11 @@
             gap: 6px;
             font-size: 16px;
             font-weight: bold;
-            color: #000;
-            background: #fef3c7;
+            color: #8b4513;
+            background: #ffd700;
             padding: 6px 12px;
-            border-radius: 16px;
-            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            border: 2px solid #8b4513;
         }
 
         .ticket-icon {
@@ -114,12 +118,13 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            background: #e0e0e0;
+            background: #d2b48c;
             padding: 6px 12px;
-            border-radius: 16px;
+            border-radius: 12px;
             font-size: 14px;
             font-weight: 600;
-            color: #000;
+            color: #8b4513;
+            border: 2px solid #8b4513;
             cursor: pointer;
             user-select: none;
         }
@@ -150,16 +155,16 @@
 
         /* Hero Section */
         .hero-section {
-            background: #d0d0d0;
+            background: #d2b48c;
             padding: 24px 16px;
             text-align: center;
-            border-bottom: 1px solid #c0c0c0;
+            border-bottom: 3px solid #8b4513;
         }
 
         .hero-title {
             font-size: 32px;
             font-weight: bold;
-            color: #000;
+            color: #8b4513;
             margin-bottom: 16px;
         }
 
@@ -167,8 +172,8 @@
             width: 120px;
             height: 120px;
             margin: 0 auto;
-            background: #a0a0a0;
-            border: 2px solid #808080;
+            background: #f5e6d3;
+            border: 3px solid #8b4513;
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -191,12 +196,12 @@
         .tab-button {
             flex: 1;
             padding: 10px 12px;
-            border: 2px solid #c0c0c0;
+            border: 2px solid #8b4513;
             border-radius: 8px;
-            background: #f5f5f5;
+            background: #d2b48c;
             font-size: 14px;
             font-weight: 600;
-            color: #666;
+            color: #8b4513;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -207,9 +212,10 @@
         }
 
         .tab-button.active {
-            background: #7c3aed;
-            border-color: #6d28d9;
-            color: #fff;
+            background: #ffd700;
+            border-color: #8b4513;
+            color: #8b4513;
+            border-width: 3px;
         }
 
         .tab-button:active:not(.active):not(.disabled) {
@@ -233,11 +239,12 @@
         }
 
         .tab-description {
-            background: #fff;
-            border: 2px solid #e0e0e0;
+            background: #f5e6d3;
+            border: 2px solid #8b4513;
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 16px;
+            color: #8b4513;
             font-size: 13px;
             color: #666;
             text-align: center;
@@ -431,8 +438,8 @@
         }
 
         .production-section {
-            background: #fff;
-            border: 2px solid #c0c0c0;
+            background: #f5e6d3;
+            border: 3px solid #8b4513;
             border-radius: 12px;
             padding: 16px;
             margin-top: 24px;
@@ -442,14 +449,14 @@
         .production-title {
             font-size: 16px;
             font-weight: bold;
-            color: #000;
+            color: #8b4513;
             text-align: center;
             margin-bottom: 12px;
         }
 
         .production-rate {
             font-size: 14px;
-            color: #666;
+            color: #8b4513;
             text-align: center;
             margin-bottom: 16px;
         }
@@ -457,12 +464,12 @@
         .collect-button {
             width: 100%;
             padding: 14px;
-            border: 2px solid #c0c0c0;
+            border: 3px solid #8b4513;
             border-radius: 24px;
-            background: #fff;
+            background: #ffd700;
             font-size: 16px;
             font-weight: 600;
-            color: #000;
+            color: #8b4513;
             cursor: pointer;
             transition: all 0.2s ease;
             margin-bottom: 12px;
@@ -493,8 +500,8 @@
         }
 
         .deposit-card {
-            background: #fff;
-            border: 3px solid #c0c0c0;
+            background: #f5e6d3;
+            border: 3px solid #8b4513;
             border-radius: 12px;
             padding: 16px;
             cursor: pointer;
