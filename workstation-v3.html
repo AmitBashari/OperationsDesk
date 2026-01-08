@@ -297,39 +297,12 @@
             margin-top: 12px;
         }
 
-        .upgrade-progress-container {
-            position: relative;
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 8px auto;
-        }
-
-        .upgrade-progress-ring {
-            transform: rotate(-90deg);
-        }
-
-        .upgrade-progress-bg {
-            fill: none;
-            stroke: #e0e0e0;
-            stroke-width: 6;
-        }
-
-        .upgrade-progress-bar {
-            fill: none;
-            stroke: #7c3aed;
-            stroke-width: 6;
-            stroke-linecap: round;
-            transition: stroke-dashoffset 0.3s ease;
-        }
-
-        .upgrade-time-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 10px;
+        .upgrade-time-display {
+            font-size: 16px;
             font-weight: bold;
             color: #7c3aed;
+            text-align: center;
+            margin-bottom: 12px;
         }
 
         .speedup-buttons {
@@ -1336,6 +1309,7 @@
 
             const openGemConfirm = () => {
                 if (!upgradeTimer) return;
+                setShowTicketModal(false);
                 setShowGemConfirm(true);
             };
 
@@ -1471,36 +1445,25 @@
 
                         {upgradeTimer ? (
                             <div className="upgrade-timer">
-                                <div className="upgrade-progress-container">
-                                    <svg className="upgrade-progress-ring" width="60" height="60">
-                                        <circle className="upgrade-progress-bg" cx="30" cy="30" r="26" />
-                                        <circle
-                                            className="upgrade-progress-bar"
-                                            cx="30"
-                                            cy="30"
-                                            r="26"
-                                            strokeDasharray={circumference}
-                                            strokeDashoffset={circumference - (upgradeProgress / 100) * circumference}
-                                        />
-                                    </svg>
-                                    <div className="upgrade-time-text">
-                                        {formatTime(upgradeRemaining)}
-                                    </div>
+                                <div className="upgrade-time-display">
+                                    Time remaining: {formatTime(upgradeRemaining)}
                                 </div>
                                 <div className="speedup-buttons">
-                                    <button
-                                        className="speedup-button primary"
-                                        onClick={openTicketModal}
-                                        disabled={speedupTickets < 1}
-                                    >
-                                        🎫 Use Tickets
-                                    </button>
-                                    <button
-                                        className="speedup-button"
-                                        onClick={openGemConfirm}
-                                    >
-                                        💎 Use Gems
-                                    </button>
+                                    {speedupTickets > 0 ? (
+                                        <button
+                                            className="speedup-button primary"
+                                            onClick={openTicketModal}
+                                        >
+                                            🎫 Use Tickets
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="speedup-button"
+                                            onClick={openGemConfirm}
+                                        >
+                                            💎 Use Gems
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ) : (
@@ -1837,6 +1800,11 @@
                                     </button>
                                     <button className="modal-button primary" onClick={confirmTicketSpeedup}>
                                         Use {ticketAmount} {ticketAmount === 1 ? 'Ticket' : 'Tickets'}
+                                    </button>
+                                </div>
+                                <div style={{marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e0e0e0', textAlign: 'center'}}>
+                                    <button className="modal-button" onClick={openGemConfirm} style={{width: '100%'}}>
+                                        💎 Use Gems Instead
                                     </button>
                                 </div>
                             </div>
