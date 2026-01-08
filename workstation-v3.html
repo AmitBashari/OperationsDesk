@@ -53,6 +53,29 @@
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
+            position: relative;
+        }
+
+        .close-feature-button {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .close-feature-button:active {
+            background: #d0d0d0;
         }
 
         .gem-balance {
@@ -182,6 +205,18 @@
         .tab-content {
             padding: 16px;
             flex: 1;
+        }
+
+        .tab-description {
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+            line-height: 1.4;
         }
 
         /* Gem Mine Tab */
@@ -822,6 +857,10 @@
         .collect-ready {
             animation: collectPulse 1.5s ease-in-out infinite;
             position: relative;
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%) !important;
+            color: #fff !important;
+            border-color: #7c3aed !important;
+            font-size: 18px !important;
         }
 
         @keyframes collectPulse {
@@ -841,6 +880,38 @@
         @keyframes sparkle {
             0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
             50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        }
+
+        .collect-full {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: #fff !important;
+            border-color: #10b981 !important;
+            font-size: 20px !important;
+            font-weight: bold !important;
+            animation: collectFullPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes collectFullPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { transform: scale(1.08); box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+        }
+
+        .collect-full::before {
+            content: '💎';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            font-size: 24px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .collect-full::after {
+            content: '💎';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 24px;
+            animation: sparkle 2s ease-in-out infinite 1s;
         }
 
         /* Tab Badge */
@@ -916,14 +987,6 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            animation: levelUpFade 2s ease-out forwards;
-        }
-
-        @keyframes levelUpFade {
-            0% { opacity: 0; }
-            30% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; }
         }
 
         .level-up-text {
@@ -931,7 +994,13 @@
             font-weight: bold;
             color: #fff;
             text-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
-            animation: levelUpBounce 2s ease-out;
+        }
+
+        @keyframes levelUpFade {
+            0% { opacity: 0; }
+            30% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         @keyframes levelUpBounce {
@@ -1072,11 +1141,13 @@
             const handleUpgrade = () => {
                 if (!nextLevel || gems < currentLevel.upgradeCost) return;
                 setGems(g => g - currentLevel.upgradeCost);
-                setLevel(l => l + 1);
+                const newLevel = level + 1;
+                setLevel(newLevel);
 
-                // Show level up animation
+                // Show level up animation with duration based on level
+                const duration = 2000 + (newLevel * 200); // Starts at 2.2s for level 2, increases by 0.2s per level
                 setShowLevelUp(true);
-                setTimeout(() => setShowLevelUp(false), 2000);
+                setTimeout(() => setShowLevelUp(false), duration);
 
                 // Spawn level up particles
                 spawnParticles(207, 400, 20, '⭐');
@@ -1084,7 +1155,7 @@
 
             const openDepositDetail = (deposit) => {
                 if (level < deposit.unlockLevel) {
-                    showTooltip(`Unlock at Level ${deposit.unlockLevel}`);
+                    showTooltip(`Unlocks at Primal Trove Level ${deposit.unlockLevel}`);
                     return;
                 }
                 if (activeDeposits[deposit.id]) return; // Already active
@@ -1144,12 +1215,11 @@
                 const d = Math.floor(seconds / 86400);
                 const h = Math.floor((seconds % 86400) / 3600);
                 const m = Math.floor((seconds % 3600) / 60);
-                const s = Math.floor(seconds % 60);
 
-                if (d > 0) return `${d}d ${h}h ${m}m ${s}s`;
-                if (h > 0) return `${h}h ${m}m ${s}s`;
-                if (m > 0) return `${m}m ${s}s`;
-                return `${s}s`;
+                if (d > 0) return `${d}d ${h}h ${m}m`;
+                if (h > 0) return `${h}h ${m}m`;
+                if (m > 0) return `${m}m`;
+                return '< 1m';
             };
 
             const formatProductionTime = (seconds) => {
@@ -1193,6 +1263,9 @@
                             <span>Level {level}</span>
                             <div className="info-icon">i</div>
                         </div>
+                        <button className="close-feature-button" onClick={() => showTooltip('Feature closed')}>
+                            ✕
+                        </button>
                     </div>
 
                     {/* Scrollable Content */}
@@ -1209,7 +1282,7 @@
                                 className={`tab-button ${activeTab === 'mine' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('mine')}
                             >
-                                Gem Mine
+                                Gem Harvest
                                 {activeTab !== 'mine' && mineStorage >= 1 && (
                                     <span className="tab-badge">!</span>
                                 )}
@@ -1218,7 +1291,7 @@
                                 className={`tab-button ${activeTab === 'investments' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('investments')}
                             >
-                                Investments
+                                Catalyst Chamber
                                 {activeTab !== 'investments' && Object.values(activeDeposits).some(d => d.completed) && (
                                     <span className="tab-badge">!</span>
                                 )}
@@ -1238,6 +1311,9 @@
                         <div className="tab-content">
                             {activeTab === 'mine' && (
                                 <>
+                                    <div className="tab-description">
+                                        Harvest gems passively over time. Collect and upgrade to increase production.
+                                    </div>
                                     <div className="level-display">
                                         <div className="level-text">Level {level}</div>
                                         {nextLevel && (
@@ -1264,21 +1340,27 @@
                                             Rate: 1 Gem every {formatProductionTime(currentLevel.productionTime)}
                                         </div>
                                         <button
-                                            className={`collect-button ${mineStorage >= 1 ? 'collect-ready' : ''}`}
+                                            className={`collect-button ${mineStorage >= currentLevel.maxStorage ? 'collect-full' : mineStorage >= 1 ? 'collect-ready' : ''}`}
                                             onClick={collectMine}
                                             disabled={mineStorage < 1}
                                         >
-                                            Collect
+                                            {mineStorage >= currentLevel.maxStorage ? '🎉 COLLECT NOW! 🎉' : 'Collect'}
                                         </button>
                                         <div className="time-until-full">
-                                            Time until full: {getTimeUntilFull()}
+                                            {mineStorage >= currentLevel.maxStorage
+                                                ? 'Harvest Storage is FULL'
+                                                : `Time until full: ${getTimeUntilFull()}`}
                                         </div>
                                     </div>
                                 </>
                             )}
 
                             {activeTab === 'investments' && (
-                                <div className="deposits-grid">
+                                <>
+                                    <div className="tab-description">
+                                        Lock gems for fixed periods to earn interest. Longer deposits yield higher returns.
+                                    </div>
+                                    <div className="deposits-grid">
                                     {CONFIG.deposits.map(deposit => {
                                         const isLocked = level < deposit.unlockLevel;
                                         const active = activeDeposits[deposit.id];
@@ -1326,14 +1408,20 @@
                                             </div>
                                         );
                                     })}
-                                </div>
+                                    </div>
+                                </>
                             )}
 
                             {activeTab === 'upgrades' && (
-                                <div style={{textAlign: 'center', padding: '40px 20px', color: '#666'}}>
-                                    <div style={{fontSize: '48px', marginBottom: '16px'}}>🔒</div>
-                                    <div style={{fontSize: '18px', fontWeight: 'bold'}}>Coming Soon</div>
-                                </div>
+                                <>
+                                    <div className="tab-description">
+                                        Unlock permanent boosts to accelerate your gem empire's growth.
+                                    </div>
+                                    <div style={{textAlign: 'center', padding: '40px 20px', color: '#666'}}>
+                                        <div style={{fontSize: '48px', marginBottom: '16px'}}>🔒</div>
+                                        <div style={{fontSize: '18px', fontWeight: 'bold'}}>Coming Soon</div>
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>
@@ -1344,7 +1432,6 @@
                         <div className="bottom-icon">⚔️</div>
                         <div className="bottom-icon camping">
                             🏕️
-                            <span>Camping</span>
                         </div>
                         <div className="bottom-icon">🎯</div>
                         <div className="bottom-icon">⚙️</div>
@@ -1485,8 +1572,20 @@
 
                     {/* Level Up Overlay */}
                     {showLevelUp && (
-                        <div className="level-up-overlay">
-                            <div className="level-up-text">LEVEL {level}!</div>
+                        <div
+                            className="level-up-overlay"
+                            style={{
+                                animation: `levelUpFade ${2 + (level * 0.2)}s ease-out forwards`
+                            }}
+                        >
+                            <div
+                                className="level-up-text"
+                                style={{
+                                    animation: `levelUpBounce ${2 + (level * 0.2)}s ease-out`
+                                }}
+                            >
+                                LEVEL {level}!
+                            </div>
                         </div>
                     )}
 
