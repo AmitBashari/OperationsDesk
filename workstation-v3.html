@@ -1646,15 +1646,19 @@
                 if (newEndTime <= Date.now()) {
                     // Complete immediately if time reduction exceeds remaining time
                     completeUpgrade();
+                    setShowTicketModal(false);
                 } else {
-                    // Update timer with reduced time
+                    // Update timer with reduced time - keep modal open
                     setUpgradeTimer({
                         ...upgradeTimer,
                         endTime: newEndTime
                     });
+                    // Recalculate ticket amount for new remaining time
+                    const newRemainingTime = Math.max(0, (newEndTime - Date.now()) / 1000);
+                    const newTicketsNeeded = Math.ceil(newRemainingTime / 300);
+                    const newMaxTickets = Math.min(speedupTickets - ticketAmount, newTicketsNeeded);
+                    setTicketAmount(Math.max(1, newMaxTickets));
                 }
-
-                setShowTicketModal(false);
             };
 
             const openGemConfirm = () => {
@@ -1680,16 +1684,21 @@
             };
 
             const confirmTicketAndGemFinish = () => {
-                if (!upgradeTimer || ticketAmount < 1 || speedupTickets < ticketAmount) return;
+                if (!upgradeTimer) return;
 
-                // Calculate remaining time after using tickets
-                const timeReduction = ticketAmount * 300; // in seconds
+                // If user has tickets, use them first
+                const ticketsToUse = speedupTickets >= ticketAmount ? ticketAmount : 0;
+
+                // Calculate remaining time after using tickets (if any)
+                const timeReduction = ticketsToUse * 300; // in seconds
                 const remainingSeconds = Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000) - timeReduction;
                 const remainingMinutes = Math.max(0, remainingSeconds / 60);
                 const gemCost = Math.ceil(remainingMinutes * 10); // 10 gems per minute
 
                 if (gems >= gemCost) {
-                    setSpeedupTickets(t => t - ticketAmount);
+                    if (ticketsToUse > 0) {
+                        setSpeedupTickets(t => t - ticketsToUse);
+                    }
                     setGems(g => g - gemCost);
                     completeUpgrade();
                     setShowTicketModal(false);
@@ -2141,7 +2150,11 @@
                         const ticketsNeeded = Math.ceil(remainingSeconds / 300);
                         const maxTickets = Math.min(speedupTickets, ticketsNeeded);
                         const timeReduction = ticketAmount * 5; // minutes
-                        const gemCostForFinish = Math.ceil((remainingSeconds / 60) * 10);
+
+                        // Calculate gem cost: if we have tickets, calculate cost after using them; otherwise use full time
+                        const ticketsToUse = speedupTickets >= ticketAmount ? ticketAmount : 0;
+                        const timeAfterTickets = Math.max(0, remainingSeconds - (ticketsToUse * 300));
+                        const gemCostForFinish = Math.ceil((timeAfterTickets / 60) * 10);
 
                         return (
                             <div className="modal-overlay" onClick={() => setShowTicketModal(false)}>
