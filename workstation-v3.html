@@ -817,6 +817,129 @@
             cursor: pointer;
             z-index: 500;
         }
+
+        /* Collection Ready Animations */
+        .collect-ready {
+            animation: collectPulse 1.5s ease-in-out infinite;
+            position: relative;
+        }
+
+        @keyframes collectPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
+        }
+
+        .collect-ready::before {
+            content: '✨';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 20px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        }
+
+        /* Tab Badge */
+        .tab-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            animation: badgePulse 1s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .tab-button {
+            position: relative;
+        }
+
+        /* Particle System */
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            font-size: 24px;
+            pointer-events: none;
+            animation: particleFloat 2s ease-out forwards;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-300px) scale(0.3) rotate(360deg);
+            }
+        }
+
+        /* Level Up Overlay */
+        .level-up-overlay {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 100%;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, rgba(0, 0, 0, 0.8) 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: levelUpFade 2s ease-out forwards;
+        }
+
+        @keyframes levelUpFade {
+            0% { opacity: 0; }
+            30% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .level-up-text {
+            font-size: 48px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+            animation: levelUpBounce 2s ease-out;
+        }
+
+        @keyframes levelUpBounce {
+            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+            70% { transform: scale(0.9) rotate(-5deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -863,6 +986,9 @@
             const [investAmount, setInvestAmount] = useState(100);
             const [showConfirmation, setShowConfirmation] = useState(false);
             const [tooltip, setTooltip] = useState(null);
+            const [particles, setParticles] = useState([]);
+            const [showLevelUp, setShowLevelUp] = useState(false);
+            const particleIdRef = useRef(0);
 
             const currentLevel = CONFIG.levels[level - 1];
             const nextLevel = CONFIG.levels[level];
@@ -909,17 +1035,51 @@
                 }
             }, [showLevelInfo, level]);
 
+            const spawnParticles = (x, y, count = 10, emoji = '💎') => {
+                const newParticles = [];
+                for (let i = 0; i < count; i++) {
+                    const id = particleIdRef.current++;
+                    const offsetX = (Math.random() - 0.5) * 100;
+                    const offsetY = (Math.random() - 0.5) * 50;
+                    newParticles.push({
+                        id,
+                        emoji,
+                        x: x + offsetX,
+                        y: y + offsetY,
+                    });
+                }
+                setParticles(prev => [...prev, ...newParticles]);
+
+                setTimeout(() => {
+                    setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
+                }, 2000);
+            };
+
             const collectMine = () => {
                 const amount = Math.floor(mineStorage);
                 setGems(g => g + amount);
                 setMineStorage(0);
                 setLastCollectTime(Date.now());
+
+                // Spawn particles from button
+                const button = document.querySelector('.collect-button');
+                if (button) {
+                    const rect = button.getBoundingClientRect();
+                    spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 15, '💎');
+                }
             };
 
             const handleUpgrade = () => {
                 if (!nextLevel || gems < currentLevel.upgradeCost) return;
                 setGems(g => g - currentLevel.upgradeCost);
                 setLevel(l => l + 1);
+
+                // Show level up animation
+                setShowLevelUp(true);
+                setTimeout(() => setShowLevelUp(false), 2000);
+
+                // Spawn level up particles
+                spawnParticles(207, 400, 20, '⭐');
             };
 
             const openDepositDetail = (deposit) => {
@@ -966,6 +1126,13 @@
                 const updated = { ...activeDeposits };
                 delete updated[depositId];
                 setActiveDeposits(updated);
+
+                // Spawn particles from deposit card
+                const card = document.querySelector(`[data-deposit-id="${depositId}"]`);
+                if (card) {
+                    const rect = card.getBoundingClientRect();
+                    spawnParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 15, deposit.icon);
+                }
             };
 
             const showTooltip = (message) => {
@@ -1043,12 +1210,18 @@
                                 onClick={() => setActiveTab('mine')}
                             >
                                 Gem Mine
+                                {activeTab !== 'mine' && mineStorage >= 1 && (
+                                    <span className="tab-badge">!</span>
+                                )}
                             </button>
                             <button
                                 className={`tab-button ${activeTab === 'investments' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('investments')}
                             >
                                 Investments
+                                {activeTab !== 'investments' && Object.values(activeDeposits).some(d => d.completed) && (
+                                    <span className="tab-badge">!</span>
+                                )}
                             </button>
                             <button
                                 className={`tab-button ${activeTab === 'upgrades' ? 'active' : ''}`}
@@ -1091,7 +1264,7 @@
                                             Rate: 1 Gem every {formatProductionTime(currentLevel.productionTime)}
                                         </div>
                                         <button
-                                            className="collect-button"
+                                            className={`collect-button ${mineStorage >= 1 ? 'collect-ready' : ''}`}
                                             onClick={collectMine}
                                             disabled={mineStorage < 1}
                                         >
@@ -1122,6 +1295,7 @@
                                         return (
                                             <div
                                                 key={deposit.id}
+                                                data-deposit-id={deposit.id}
                                                 className={`deposit-card ${isLocked ? 'locked' : ''} ${active ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
                                                 onClick={() => {
                                                     if (isCompleted) {
@@ -1291,6 +1465,29 @@
                     {/* Floating Tooltip */}
                     {tooltip && (
                         <div className="floating-tooltip">{tooltip}</div>
+                    )}
+
+                    {/* Particle Container */}
+                    <div className="particle-container">
+                        {particles.map(particle => (
+                            <div
+                                key={particle.id}
+                                className="particle"
+                                style={{
+                                    left: `${particle.x}px`,
+                                    top: `${particle.y}px`,
+                                }}
+                            >
+                                {particle.emoji}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Level Up Overlay */}
+                    {showLevelUp && (
+                        <div className="level-up-overlay">
+                            <div className="level-up-text">LEVEL {level}!</div>
+                        </div>
                     )}
 
                     {/* Debug Button */}
