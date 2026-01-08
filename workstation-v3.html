@@ -830,16 +830,16 @@
         // Configuration
         const CONFIG = {
             levels: [
-                { level: 1, maxStorage: 10, productionTime: 18000, upgradeCost: 500, depositBonus: 0 },      // 5h
-                { level: 2, maxStorage: 20, productionTime: 14400, upgradeCost: 600, depositBonus: 0.02 },  // 4h
-                { level: 3, maxStorage: 30, productionTime: 10800, upgradeCost: 700, depositBonus: 0.04 },  // 3h - Unlock 7-day
-                { level: 4, maxStorage: 40, productionTime: 9000, upgradeCost: 800, depositBonus: 0.06 },   // 2.5h
-                { level: 5, maxStorage: 50, productionTime: 7200, upgradeCost: 900, depositBonus: 0.08 },   // 2h - Unlock 14-day
-                { level: 6, maxStorage: 60, productionTime: 5400, upgradeCost: 1000, depositBonus: 0.10 },  // 1.5h
-                { level: 7, maxStorage: 70, productionTime: 3600, upgradeCost: 1100, depositBonus: 0.12 },  // 1h - Unlock 30-day
-                { level: 8, maxStorage: 80, productionTime: 2700, upgradeCost: 1200, depositBonus: 0.14 },  // 45min
-                { level: 9, maxStorage: 90, productionTime: 1800, upgradeCost: 1300, depositBonus: 0.16 },  // 30min - Unlock 60-day
-                { level: 10, maxStorage: 100, productionTime: 900, upgradeCost: null, depositBonus: 0.20 }, // 15min
+                { level: 1, maxStorage: 10, productionTime: 18000, upgradeCost: 500, depositBonus: 0, investmentCap: 100 },      // 5h
+                { level: 2, maxStorage: 20, productionTime: 14400, upgradeCost: 600, depositBonus: 0.02, investmentCap: 250 },  // 4h
+                { level: 3, maxStorage: 30, productionTime: 10800, upgradeCost: 700, depositBonus: 0.04, investmentCap: 500 },  // 3h - Unlock 7-day
+                { level: 4, maxStorage: 40, productionTime: 9000, upgradeCost: 800, depositBonus: 0.06, investmentCap: 1000 },   // 2.5h
+                { level: 5, maxStorage: 50, productionTime: 7200, upgradeCost: 900, depositBonus: 0.08, investmentCap: 2000 },   // 2h - Unlock 14-day
+                { level: 6, maxStorage: 60, productionTime: 5400, upgradeCost: 1000, depositBonus: 0.10, investmentCap: 4000 },  // 1.5h
+                { level: 7, maxStorage: 70, productionTime: 3600, upgradeCost: 1100, depositBonus: 0.12, investmentCap: 7000 },  // 1h - Unlock 30-day
+                { level: 8, maxStorage: 80, productionTime: 2700, upgradeCost: 1200, depositBonus: 0.14, investmentCap: 12000 },  // 45min
+                { level: 9, maxStorage: 90, productionTime: 1800, upgradeCost: 1300, depositBonus: 0.16, investmentCap: 20000 },  // 30min - Unlock 60-day
+                { level: 10, maxStorage: 100, productionTime: 900, upgradeCost: null, depositBonus: 0.20, investmentCap: 50000 }, // 15min
             ],
             deposits: [
                 { id: '7day', name: '7-Day', duration: 7, baseInterest: 0.15, unlockLevel: 3, icon: '⛰️' },
@@ -897,6 +897,18 @@
                 return () => clearInterval(interval);
             }, []);
 
+            // Scroll to current level when level info modal opens
+            useEffect(() => {
+                if (showLevelInfo) {
+                    setTimeout(() => {
+                        const element = document.getElementById(`level-${level}`);
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 100);
+                }
+            }, [showLevelInfo, level]);
+
             const collectMine = () => {
                 const amount = Math.floor(mineStorage);
                 setGems(g => g + amount);
@@ -917,7 +929,7 @@
                 }
                 if (activeDeposits[deposit.id]) return; // Already active
                 setSelectedDeposit(deposit);
-                setInvestAmount(Math.min(100, gems));
+                setInvestAmount(Math.min(100, Math.min(gems, currentLevel.investmentCap)));
             };
 
             const confirmDeposit = () => {
@@ -1194,6 +1206,10 @@
                                             {((selectedDeposit.baseInterest + currentLevel.depositBonus) * 100).toFixed(0)}%
                                         </span>
                                     </div>
+                                    <div className="detail-row">
+                                        <span className="detail-label">Max Investment</span>
+                                        <span className="detail-value">{currentLevel.investmentCap.toLocaleString()} 💎</span>
+                                    </div>
                                 </div>
 
                                 <div className="investment-input">
@@ -1203,7 +1219,7 @@
                                         type="range"
                                         className="investment-slider"
                                         min="10"
-                                        max={gems}
+                                        max={Math.min(gems, currentLevel.investmentCap)}
                                         step="10"
                                         value={investAmount}
                                         onChange={(e) => setInvestAmount(parseInt(e.target.value))}
@@ -1250,12 +1266,17 @@
                             <div className="level-info-content" onClick={(e) => e.stopPropagation()}>
                                 <div className="level-info-title">Level Information</div>
                                 {CONFIG.levels.map((lvl, idx) => (
-                                    <div key={idx} className={`level-item ${lvl.level === level ? 'current' : ''}`}>
+                                    <div
+                                        key={idx}
+                                        className={`level-item ${lvl.level === level ? 'current' : ''}`}
+                                        id={`level-${lvl.level}`}
+                                    >
                                         <div className="level-header">Level {lvl.level}</div>
                                         <div className="level-stats">
                                             • Storage Cap: {lvl.maxStorage} 💎<br/>
                                             • Production: 1 💎 every {formatProductionTime(lvl.productionTime)}<br/>
                                             • Deposit Bonus: +{(lvl.depositBonus * 100).toFixed(0)}%<br/>
+                                            • Max Investment: {lvl.investmentCap.toLocaleString()} 💎<br/>
                                             {lvl.upgradeCost && `• Upgrade Cost: ${lvl.upgradeCost} 💎`}
                                         </div>
                                     </div>
