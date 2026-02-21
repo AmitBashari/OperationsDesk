@@ -1,12 +1,2637 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0; url=workstation-v3.html">
-    <title>Primal Trove - Workstation V3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Primal Trove</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --slate-dark: #2F3846;
+            --cobalt: #2B69E6;
+            --cobalt-light: #3B79F6;
+            --cobalt-dim: #1E4FAA;
+            --crimson: #F1365D;
+            --crimson-dark: #D42248;
+            --emerald: #10B981;
+            --emerald-dark: #059669;
+            --bg-window: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --text-primary: #0F172A;
+            --text-secondary: #94A3B8;
+            --text-muted: #CBD5E1;
+            --border-light: #E2E8F0;
+            --border-medium: #CBD5E1;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0F172A;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .portrait-container {
+            width: 100%;
+            max-width: 414px;
+            height: 100vh;
+            background: var(--bg-window);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+        }
+
+        #root {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── TOP BAR ── */
+        .top-bar {
+            background: var(--slate-dark);
+            padding: 14px 56px 14px 16px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .close-feature-button {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            width: 34px;
+            height: 34px;
+            background: var(--crimson);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 900;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: background 0.15s;
+        }
+
+        .close-feature-button:active {
+            background: var(--crimson-dark);
+        }
+
+        .gem-balance {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 15px;
+            font-weight: 900;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 7px 14px;
+            border-radius: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .speedup-tickets {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 15px;
+            font-weight: 900;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 7px 14px;
+            border-radius: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .ticket-icon {
+            font-size: 16px;
+        }
+
+        .gem-icon {
+            font-size: 18px;
+        }
+
+        .level-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--cobalt);
+            padding: 7px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 900;
+            color: #fff;
+            cursor: pointer;
+            user-select: none;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: background 0.15s;
+        }
+
+        .level-info:active {
+            background: var(--cobalt-dim);
+        }
+
+        .info-icon {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* ── SCROLLABLE ── */
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* ── HERO ── */
+        .hero-section {
+            background: var(--slate-dark);
+            padding: 20px 16px 28px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 24px;
+            background: var(--slate-dark);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+        }
+
+        .hero-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -0.03em;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+        }
+
+        .image-placeholder {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* ── TABS ── */
+        .tab-navigation {
+            display: flex;
+            gap: 6px;
+            padding: 20px 16px 12px;
+            background: var(--bg-window);
+            flex-shrink: 0;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 10px 8px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            background: var(--bg-card);
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            user-select: none;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            position: relative;
+        }
+
+        .tab-button.active {
+            background: var(--cobalt);
+            border-color: var(--cobalt);
+            color: #fff;
+        }
+
+        .tab-button:active:not(.active):not(.disabled) {
+            background: var(--bg-window);
+        }
+
+        .tab-button.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .lock-icon {
+            font-size: 11px;
+        }
+
+        /* ── TAB CONTENT ── */
+        .tab-content {
+            padding: 12px 16px 16px;
+            flex: 1;
+        }
+
+        /* ── FEATURE DESCRIPTION ── */
+        .feature-description {
+            background: var(--bg-card);
+            border: 2px solid var(--border-light);
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 4px;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            letter-spacing: -0.01em;
+        }
+
+        .feature-description-title {
+            color: var(--text-primary);
+            font-weight: 900;
+            margin-bottom: 6px;
+            font-size: 15px;
+            letter-spacing: -0.02em;
+        }
+
+        /* ── TROVE LEVEL SECTION ── */
+        .trove-level-section-horizontal {
+            background: var(--bg-card);
+            border: 2px solid var(--border-light);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-top: 4px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .upgrade-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upgrade-level-label {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--cobalt);
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .upgrade-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .upgrade-time-compact {
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--cobalt);
+            white-space: nowrap;
+        }
+
+        .speedup-button-compact {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 10px;
+            background: var(--cobalt);
+            color: #fff;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-width: 40px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .speedup-button-compact:active {
+            background: var(--cobalt-dim);
+        }
+
+        .speedup-button-compact.primary {
+            background: var(--cobalt);
+        }
+
+        .speedup-button-compact.primary:active {
+            background: var(--cobalt-dim);
+        }
+
+        .upgrade-button-compact {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 10px;
+            background: var(--cobalt);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .upgrade-button-compact:disabled {
+            background: var(--border-light);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .upgrade-button-compact:active:not(:disabled) {
+            background: var(--cobalt-dim);
+        }
+
+        /* ── PRODUCTION SECTION ── */
+        .production-section {
+            background: var(--bg-card);
+            border: 2px solid var(--border-light);
+            border-radius: 16px;
+            padding: 20px 16px;
+            margin-top: 0;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .production-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+
+        .production-rate {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .collect-button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: var(--cobalt);
+            font-size: 16px;
+            font-weight: 900;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .collect-button:active:not(:disabled) {
+            background: var(--cobalt-dim);
+        }
+
+        .collect-button:disabled {
+            background: var(--border-light);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .time-until-full {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* ── DEPOSITS GRID ── */
+        .deposits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .deposit-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-light);
+            border-radius: 16px;
+            padding: 18px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            min-height: 130px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .deposit-card.locked {
+            opacity: 0.4;
+        }
+
+        .deposit-card.active {
+            border-color: var(--cobalt);
+            box-shadow: 0 0 0 1px var(--cobalt), 0 4px 12px rgba(43, 105, 230, 0.15);
+        }
+
+        .deposit-card.completed {
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 1px var(--emerald), 0 4px 12px rgba(16, 185, 129, 0.2);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        .deposit-card:active:not(.locked) {
+            transform: scale(0.97);
+        }
+
+        .deposit-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-window);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .deposit-name {
+            font-size: 13px;
+            font-weight: 900;
+            color: var(--text-primary);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .deposit-lock-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            background: var(--text-secondary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        .deposit-timer {
+            font-size: 12px;
+            color: var(--cobalt);
+            font-weight: 900;
+            letter-spacing: 0.02em;
+        }
+
+        .deposit-progress {
+            width: 100%;
+            height: 4px;
+            background: var(--border-light);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 2px;
+        }
+
+        .deposit-progress-bar {
+            height: 100%;
+            background: var(--cobalt);
+            border-radius: 2px;
+            transition: width 1s linear;
+        }
+
+        /* ── DEPOSIT DETAIL VIEW ── */
+        .deposit-detail {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 100%;
+            background: var(--bg-window);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.25s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%) translateX(-50%);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        .detail-header {
+            background: var(--slate-dark);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-button {
+            width: 34px;
+            height: 34px;
+            border: none;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+
+        .back-button:active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .detail-title {
+            font-size: 17px;
+            font-weight: 900;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .detail-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .detail-hero {
+            background: var(--slate-dark);
+            border-radius: 16px;
+            padding: 28px;
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .detail-hero-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+        }
+
+        .detail-info {
+            background: var(--bg-card);
+            border: 2px solid var(--border-light);
+            border-radius: 14px;
+            padding: 4px 16px;
+            margin-bottom: 14px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .detail-value {
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--text-primary);
+        }
+
+        .investment-input {
+            background: var(--bg-card);
+            border: 2px solid var(--border-light);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+
+        .input-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .input-value {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 14px;
+            letter-spacing: -0.03em;
+        }
+
+        .investment-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: var(--border-light);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .investment-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            background: var(--cobalt);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(43, 105, 230, 0.3);
+        }
+
+        .investment-slider::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            background: var(--cobalt);
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .expected-payout {
+            background: #ECFDF5;
+            border: 2px solid var(--emerald);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+
+        .payout-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--emerald-dark);
+            text-align: center;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .payout-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--emerald);
+            text-align: center;
+            letter-spacing: -0.02em;
+        }
+
+        .deposit-action-button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: var(--cobalt);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .deposit-action-button:active {
+            background: var(--cobalt-dim);
+        }
+
+        /* ── MODALS ── */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 320px;
+            animation: scaleIn 0.2s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.92);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+        }
+
+        .modal-message {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-button {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            background: var(--bg-card);
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+        }
+
+        .modal-button.primary {
+            background: var(--cobalt);
+            color: #fff;
+            border-color: var(--cobalt);
+        }
+
+        .modal-button:active {
+            transform: scale(0.97);
+        }
+
+        .modal-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ── SPEED UP MODAL ── */
+        .speedup-modal {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 24px 20px;
+            width: 100%;
+            max-width: 380px;
+            animation: scaleIn 0.2s ease;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .speedup-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 34px;
+            height: 34px;
+            background: var(--crimson);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 900;
+            transition: background 0.15s;
+        }
+
+        .speedup-close:active {
+            background: var(--crimson-dark);
+        }
+
+        .speedup-header {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .speedup-progress-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .speedup-level-badge {
+            width: 48px;
+            height: 48px;
+            background: var(--cobalt);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 900;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .speedup-progress-bar {
+            flex: 1;
+            height: 40px;
+            background: var(--border-light);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .speedup-progress-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: var(--cobalt);
+            border-radius: 12px;
+            transition: width 0.3s ease;
+        }
+
+        .speedup-progress-time {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 13px;
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+            letter-spacing: 0.02em;
+        }
+
+        .speedup-upgrading-text {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .ticket-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .ticket-selector-disabled {
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .ticket-selector-disabled .ticket-display {
+            pointer-events: all;
+        }
+
+        .ticket-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 12px;
+            background: var(--slate-dark);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .ticket-btn:active:not(:disabled) {
+            transform: scale(0.93);
+        }
+
+        .ticket-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .ticket-display {
+            background: var(--cobalt);
+            border-radius: 14px;
+            padding: 8px 16px;
+            min-width: 110px;
+            text-align: center;
+        }
+
+        .ticket-time {
+            font-size: 15px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .ticket-count {
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .speedup-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .speedup-action-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .speedup-action-btn:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+
+        .speedup-action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .speedup-ticket-btn {
+            background: var(--cobalt);
+            color: #fff;
+        }
+
+        .speedup-finish-btn {
+            background: var(--emerald);
+            color: #fff;
+        }
+
+        .speedup-btn-icon {
+            font-size: 16px;
+        }
+
+        .speedup-btn-text {
+            font-size: 14px;
+        }
+
+        /* ── TOOLTIP ── */
+        .floating-tooltip {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--slate-dark);
+            color: #fff;
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 900;
+            z-index: 400;
+            animation: tooltipFade 2s ease forwards;
+            max-width: 280px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            letter-spacing: 0.02em;
+        }
+
+        @keyframes tooltipFade {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+
+            10% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            80% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+        }
+
+        /* ── BOTTOM BAR ── */
+        .bottom-bar {
+            background: var(--bg-card);
+            border-top: 2px solid var(--border-light);
+            padding: 8px 16px 12px 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .bottom-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-window);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .bottom-icon.camping {
+            background: var(--cobalt);
+            flex-direction: column;
+            font-size: 20px;
+            padding: 4px;
+            box-shadow: 0 2px 10px rgba(43, 105, 230, 0.25);
+        }
+
+        .bottom-icon.camping span {
+            font-size: 8px;
+            margin-top: 1px;
+            color: #fff;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+        }
+
+        .bottom-icon:active {
+            transform: scale(0.92);
+        }
+
+        /* ── LEVEL INFO MODAL ── */
+        .level-info-modal {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .level-info-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px 20px;
+            width: 100%;
+            max-width: 360px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: scaleIn 0.2s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .level-info-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .level-item {
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 8px;
+            background: var(--bg-window);
+        }
+
+        .level-item.current {
+            border-color: var(--cobalt);
+            background: #EFF6FF;
+        }
+
+        .level-header {
+            font-size: 14px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .level-stats {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .close-button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--slate-dark);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            margin-top: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            transition: background 0.15s;
+        }
+
+        .close-button:active {
+            background: #1E2A36;
+        }
+
+        /* ── DEBUG ── */
+        .debug-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 8px 14px;
+            background: var(--crimson);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 900;
+            cursor: pointer;
+            z-index: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── COLLECT ANIMATIONS ── */
+        .collect-ready {
+            animation: collectPulse 1.5s ease-in-out infinite;
+            position: relative;
+            background: var(--cobalt) !important;
+            color: #fff !important;
+            font-size: 18px !important;
+        }
+
+        @keyframes collectPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(43, 105, 230, 0.5);
+            }
+
+            50% {
+                transform: scale(1.03);
+                box-shadow: 0 0 0 10px rgba(43, 105, 230, 0);
+            }
+        }
+
+        .collect-ready::before {
+            content: '✨';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 18px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(0.5) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+        }
+
+        .collect-full {
+            background: var(--emerald) !important;
+            color: #fff !important;
+            font-size: 20px !important;
+            font-weight: 900 !important;
+            animation: collectFullPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes collectFullPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 14px rgba(16, 185, 129, 0);
+            }
+        }
+
+        .collect-full::before {
+            content: '💎';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            font-size: 22px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .collect-full::after {
+            content: '💎';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 22px;
+            animation: sparkle 2s ease-in-out infinite 1s;
+        }
+
+        /* ── TAB BADGE ── */
+        .tab-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 16px;
+            height: 16px;
+            background: var(--crimson);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+            color: #fff;
+            animation: badgePulse 1s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.25);
+            }
+        }
+
+        /* ── PARTICLES ── */
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            font-size: 28px;
+            pointer-events: none;
+            animation: particleFloat 2s ease-out forwards;
+            z-index: 500;
+        }
+
+        .particle-fly {
+            animation: particleFlyTo 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-300px) scale(0.3) rotate(360deg);
+            }
+        }
+
+        @keyframes particleFlyTo {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+
+            70% {
+                opacity: 1;
+                transform: translate(var(--dx), var(--dy)) scale(1.3);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(var(--dx), var(--dy)) scale(0.2);
+            }
+        }
+
+        /* ── SAND TIMER ── */
+        .sand-timer {
+            width: 28px;
+            height: 34px;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            animation: sandTimerFlip 4s ease-in-out infinite;
+        }
+
+        @keyframes sandTimerFlip {
+
+            0%,
+            45% {
+                transform: rotate(0deg);
+            }
+
+            50%,
+            95% {
+                transform: rotate(180deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .sand-timer-body {
+            width: 20px;
+            height: 30px;
+            position: relative;
+        }
+
+        .sand-timer-body::before,
+        .sand-timer-body::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 12px;
+            border: 2px solid var(--cobalt);
+            border-radius: 2px;
+        }
+
+        .sand-timer-body::before {
+            top: 0;
+            border-radius: 2px 2px 8px 8px;
+            background: linear-gradient(to bottom, transparent 30%, var(--cobalt) 30%);
+            animation: sandDrain 4s ease-in-out infinite;
+        }
+
+        .sand-timer-body::after {
+            bottom: 0;
+            border-radius: 8px 8px 2px 2px;
+            background: linear-gradient(to bottom, var(--cobalt) 0%, var(--cobalt) 0%);
+            animation: sandFill 4s ease-in-out infinite;
+        }
+
+        @keyframes sandDrain {
+
+            0%,
+            45% {
+                background: linear-gradient(to bottom, transparent 0%, transparent 0%, var(--cobalt) 0%, var(--cobalt) 100%);
+            }
+
+            10% {
+                background: linear-gradient(to bottom, transparent 0%, transparent 30%, var(--cobalt) 30%, var(--cobalt) 100%);
+            }
+
+            40% {
+                background: linear-gradient(to bottom, transparent 0%, transparent 90%, var(--cobalt) 90%, var(--cobalt) 100%);
+            }
+
+            45%,
+            50% {
+                background: linear-gradient(to bottom, transparent 0%, transparent 100%, var(--cobalt) 100%, var(--cobalt) 100%);
+            }
+
+            50%,
+            95% {
+                background: linear-gradient(to bottom, transparent 0%, transparent 0%, var(--cobalt) 0%, var(--cobalt) 100%);
+            }
+
+            60% {
+                background: linear-gradient(to bottom, transparent 0%, transparent 30%, var(--cobalt) 30%, var(--cobalt) 100%);
+            }
+
+            90% {
+                background: linear-gradient(to bottom, transparent 0%, transparent 90%, var(--cobalt) 90%, var(--cobalt) 100%);
+            }
+
+            95%,
+            100% {
+                background: linear-gradient(to bottom, transparent 0%, transparent 100%, var(--cobalt) 100%, var(--cobalt) 100%);
+            }
+        }
+
+        @keyframes sandFill {
+            0% {
+                background: linear-gradient(to top, var(--cobalt) 0%, transparent 0%);
+            }
+
+            10% {
+                background: linear-gradient(to top, var(--cobalt) 10%, transparent 10%);
+            }
+
+            40% {
+                background: linear-gradient(to top, var(--cobalt) 80%, transparent 80%);
+            }
+
+            45%,
+            50% {
+                background: linear-gradient(to top, var(--cobalt) 100%, transparent 100%);
+            }
+
+            50% {
+                background: linear-gradient(to top, var(--cobalt) 0%, transparent 0%);
+            }
+
+            60% {
+                background: linear-gradient(to top, var(--cobalt) 10%, transparent 10%);
+            }
+
+            90% {
+                background: linear-gradient(to top, var(--cobalt) 80%, transparent 80%);
+            }
+
+            95%,
+            100% {
+                background: linear-gradient(to top, var(--cobalt) 100%, transparent 100%);
+            }
+        }
+
+        .sand-timer-neck {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 6px;
+            background: var(--cobalt);
+            z-index: 2;
+        }
+
+        .sand-timer-stream {
+            position: absolute;
+            top: 13px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 4px;
+            background: var(--cobalt);
+            animation: sandStream 4s ease-in-out infinite;
+            border-radius: 1px;
+        }
+
+        @keyframes sandStream {
+
+            0%,
+            5% {
+                opacity: 0;
+            }
+
+            8%,
+            42% {
+                opacity: 1;
+            }
+
+            45%,
+            55% {
+                opacity: 0;
+            }
+
+            58%,
+            92% {
+                opacity: 1;
+            }
+
+            95%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* ── COLLECT MODAL ── */
+        .collect-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 350;
+            padding: 20px;
+            animation: fadeIn 0.15s ease;
+            cursor: pointer;
+        }
+
+        .collect-modal {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 36px 32px 28px;
+            width: 100%;
+            max-width: 280px;
+            text-align: center;
+            animation: collectModalBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            cursor: default;
+        }
+
+        @keyframes collectModalBounce {
+            0% {
+                transform: scale(0.3) translateY(40px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .collect-modal-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+            animation: collectIconPop 0.5s ease 0.15s both;
+        }
+
+        @keyframes collectIconPop {
+            0% {
+                transform: scale(0) rotate(-30deg);
+            }
+
+            60% {
+                transform: scale(1.3) rotate(5deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .collect-modal-amount {
+            font-size: 40px;
+            font-weight: 900;
+            color: var(--cobalt);
+            letter-spacing: -0.03em;
+            margin-bottom: 4px;
+            animation: collectAmountSlide 0.35s ease 0.2s both;
+        }
+
+        @keyframes collectAmountSlide {
+            0% {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .collect-modal-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            animation: collectAmountSlide 0.35s ease 0.3s both;
+        }
+
+        .collect-modal-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--cobalt);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            transition: background 0.15s;
+            animation: collectAmountSlide 0.35s ease 0.35s both;
+        }
+
+        .collect-modal-btn:active {
+            background: var(--cobalt-dim);
+        }
+
+        /* ── LEVEL UP ── */
+        .level-up-container {
+            position: fixed;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .level-up-banner {
+            background: linear-gradient(90deg, transparent, rgba(230, 22, 54, 0.8), transparent);
+            /* slightly red/gold tint */
+            padding: 10px 80px;
+            animation: levelUpBannerAnim 1.5s ease-out forwards;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid rgba(255, 215, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.5);
+        }
+
+        .level-up-text {
+            font-size: 38px;
+            font-weight: 900;
+            color: #FFF;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8), 0 0 15px #FFD700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            animation: levelUpTextAnim 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .level-up-sub {
+            font-size: 16px;
+            color: #FFD700;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            margin-top: -5px;
+            animation: levelUpSubAnim 1.5s ease-out forwards;
+        }
+
+        @keyframes levelUpBannerAnim {
+            0% {
+                opacity: 0;
+                transform: scaleY(0);
+            }
+
+            10% {
+                opacity: 1;
+                transform: scaleY(1);
+            }
+
+            80% {
+                opacity: 1;
+                transform: scaleY(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scaleY(0);
+            }
+        }
+
+        @keyframes levelUpTextAnim {
+            0% {
+                transform: scale(0.5) translateY(20px);
+                opacity: 0;
+            }
+
+            15% {
+                transform: scale(1.1) translateY(0);
+                opacity: 1;
+            }
+
+            25% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+
+            80% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.2) translateY(-20px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes levelUpSubAnim {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            20% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            80% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <p>Redirecting to prototype...</p>
+    <div class="portrait-container">
+        <div id="root"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const CONFIG = {
+            levels: [
+                { level: 1, maxStorage: 10, productionTime: 18000, upgradeCost: 500, depositBonus: 0, investmentCap: 100 },
+                { level: 2, maxStorage: 20, productionTime: 14400, upgradeCost: 600, depositBonus: 0.02, investmentCap: 250 },
+                { level: 3, maxStorage: 30, productionTime: 10800, upgradeCost: 700, depositBonus: 0.04, investmentCap: 500 },
+                { level: 4, maxStorage: 40, productionTime: 9000, upgradeCost: 800, depositBonus: 0.06, investmentCap: 1000 },
+                { level: 5, maxStorage: 50, productionTime: 7200, upgradeCost: 900, depositBonus: 0.08, investmentCap: 2000 },
+                { level: 6, maxStorage: 60, productionTime: 5400, upgradeCost: 1000, depositBonus: 0.10, investmentCap: 4000 },
+                { level: 7, maxStorage: 70, productionTime: 3600, upgradeCost: 1100, depositBonus: 0.12, investmentCap: 7000 },
+                { level: 8, maxStorage: 80, productionTime: 2700, upgradeCost: 1200, depositBonus: 0.14, investmentCap: 12000 },
+                { level: 9, maxStorage: 90, productionTime: 1800, upgradeCost: 1300, depositBonus: 0.16, investmentCap: 20000 },
+                { level: 10, maxStorage: 100, productionTime: 900, upgradeCost: null, depositBonus: 0.20, investmentCap: 50000 },
+            ],
+            deposits: [
+                { id: '7day', name: '7-Day', duration: 7, baseInterest: 0.15, unlockLevel: 3, icon: '⛰️' },
+                { id: '14day', name: '14-Day', duration: 14, baseInterest: 0.35, unlockLevel: 5, icon: '🏔️' },
+                { id: '30day', name: '30-Day', duration: 30, baseInterest: 0.70, unlockLevel: 7, icon: '🗻' },
+                { id: '60day', name: '60-Day', duration: 60, baseInterest: 1.20, unlockLevel: 9, icon: '⚡' },
+            ],
+            startingGems: 10000,
+            startingLevel: 1,
+        };
+
+        function App() {
+            const [gems, setGems] = useState(CONFIG.startingGems);
+            const [level, setLevel] = useState(CONFIG.startingLevel);
+            const [mineStorage, setMineStorage] = useState(0);
+            const [lastCollectTime, setLastCollectTime] = useState(Date.now());
+            const [activeTab, setActiveTab] = useState('mine');
+            const [activeDeposits, setActiveDeposits] = useState({});
+            const [showLevelInfo, setShowLevelInfo] = useState(false);
+            const [selectedDeposit, setSelectedDeposit] = useState(null);
+            const [investAmount, setInvestAmount] = useState(100);
+            const [showConfirmation, setShowConfirmation] = useState(false);
+            const [tooltip, setTooltip] = useState(null);
+            const [particles, setParticles] = useState([]);
+            const [showLevelUp, setShowLevelUp] = useState(false);
+            const [speedupTickets, setSpeedupTickets] = useState(10);
+            const [upgradeTimer, setUpgradeTimer] = useState(null);
+            const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
+            const [showTicketModal, setShowTicketModal] = useState(false);
+            const [ticketAmount, setTicketAmount] = useState(1);
+            const [showGemConfirm, setShowGemConfirm] = useState(false);
+            const [collectResult, setCollectResult] = useState(null);
+            const particleIdRef = useRef(0);
+
+            const currentLevel = CONFIG.levels[level - 1];
+            const nextLevel = CONFIG.levels[level];
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setMineStorage(current => Math.min(current + 0.01, currentLevel.maxStorage));
+                }, 100);
+                return () => clearInterval(interval);
+            }, [currentLevel]);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setActiveDeposits(current => {
+                        const updated = { ...current };
+                        Object.keys(updated).forEach(key => {
+                            if (updated[key] && updated[key].endTime) {
+                                if (Date.now() >= updated[key].endTime) {
+                                    updated[key].completed = true;
+                                }
+                            }
+                        });
+                        return updated;
+                    });
+                }, 1000);
+                return () => clearInterval(interval);
+            }, []);
+
+            useEffect(() => {
+                if (showLevelInfo) {
+                    setTimeout(() => {
+                        const element = document.getElementById(`level-${level}`);
+                        if (element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                }
+            }, [showLevelInfo, level]);
+
+            useEffect(() => {
+                if (!upgradeTimer) return;
+                const interval = setInterval(() => {
+                    if (Date.now() >= upgradeTimer.endTime) completeUpgrade();
+                }, 1000);
+                return () => clearInterval(interval);
+            }, [upgradeTimer]);
+
+            const spawnParticles = (x, y, count = 10, emoji = '💎', targetX = null, targetY = null) => {
+                const newParticles = [];
+                for (let i = 0; i < count; i++) {
+                    const id = particleIdRef.current++;
+                    const offsetX = (Math.random() - 0.5) * 100;
+                    const offsetY = (Math.random() - 0.5) * 50;
+                    newParticles.push({ id, emoji, x: x + offsetX, y: y + offsetY, targetX, targetY, flyToTarget: targetX !== null && targetY !== null });
+                }
+                setParticles(prev => [...prev, ...newParticles]);
+                setTimeout(() => {
+                    setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
+                }, targetX !== null ? 1000 : 2000);
+            };
+
+            const collectMine = () => {
+                const amount = Math.floor(mineStorage);
+                setGems(g => g + amount);
+                setMineStorage(0);
+                setLastCollectTime(Date.now());
+                setCollectResult(amount);
+                const button = document.querySelector('.collect-button');
+                const gemBalance = document.querySelector('.gem-balance');
+                if (button && gemBalance) {
+                    const buttonRect = button.getBoundingClientRect();
+                    const gemRect = gemBalance.getBoundingClientRect();
+                    spawnParticles(buttonRect.left + buttonRect.width / 2, buttonRect.top + buttonRect.height / 2, 20, '💎', gemRect.left + gemRect.width / 2, gemRect.top + gemRect.height / 2);
+                }
+            };
+
+            const calculateUpgradeTime = (level) => 3600 + (level * 1800);
+
+            const handleUpgradeClick = () => {
+                if (!nextLevel || gems < currentLevel.upgradeCost || upgradeTimer) return;
+                setShowUpgradeConfirm(true);
+            };
+
+            const confirmUpgrade = () => {
+                if (!nextLevel || gems < currentLevel.upgradeCost) return;
+                setGems(g => g - currentLevel.upgradeCost);
+                const upgradeTime = calculateUpgradeTime(level);
+                setUpgradeTimer({ startTime: Date.now(), endTime: Date.now() + (upgradeTime * 1000), targetLevel: level + 1 });
+                setShowUpgradeConfirm(false);
+            };
+
+            const completeUpgrade = () => {
+                if (!upgradeTimer) return;
+                const newLevel = upgradeTimer.targetLevel;
+                setLevel(newLevel);
+                setUpgradeTimer(null);
+                setShowLevelUp(true);
+                setTimeout(() => setShowLevelUp(false), 1500);
+            };
+
+            const openTicketModal = () => {
+                if (!upgradeTimer) return;
+                const remainingTime = Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000);
+                const ticketsNeeded = Math.ceil(remainingTime / 300);
+                const maxTickets = Math.min(speedupTickets, ticketsNeeded);
+                setTicketAmount(Math.max(1, maxTickets));
+                setShowTicketModal(true);
+            };
+
+            const incrementTickets = (amount) => {
+                if (!upgradeTimer) return;
+                const remainingTime = Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000);
+                const ticketsNeeded = Math.ceil(remainingTime / 300);
+                const maxTickets = Math.min(speedupTickets, ticketsNeeded);
+                setTicketAmount(prev => Math.min(maxTickets, Math.max(1, prev + amount)));
+            };
+
+            const confirmTicketSpeedup = () => {
+                if (!upgradeTimer || ticketAmount < 1 || speedupTickets < ticketAmount) return;
+                const timeReduction = ticketAmount * 300 * 1000;
+                const newEndTime = upgradeTimer.endTime - timeReduction;
+                setSpeedupTickets(t => t - ticketAmount);
+                if (newEndTime <= Date.now()) {
+                    completeUpgrade();
+                    setShowTicketModal(false);
+                } else {
+                    setUpgradeTimer({ ...upgradeTimer, endTime: newEndTime });
+                    const newRemainingTime = Math.max(0, (newEndTime - Date.now()) / 1000);
+                    const newTicketsNeeded = Math.ceil(newRemainingTime / 300);
+                    const newMaxTickets = Math.min(speedupTickets - ticketAmount, newTicketsNeeded);
+                    setTicketAmount(Math.max(1, newMaxTickets));
+                }
+            };
+
+            const openGemConfirm = () => {
+                if (!upgradeTimer) return;
+                setShowTicketModal(false);
+                setShowGemConfirm(true);
+            };
+
+            const confirmGemSpeedup = () => {
+                if (!upgradeTimer) return;
+                const remainingTime = Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000 / 60);
+                const gemCost = Math.ceil(remainingTime * 10);
+                if (gems >= gemCost) {
+                    setGems(g => g - gemCost);
+                    completeUpgrade();
+                    setShowGemConfirm(false);
+                } else {
+                    showTooltip(`Need ${gemCost} 💎`);
+                    setShowGemConfirm(false);
+                }
+            };
+
+            const confirmTicketAndGemFinish = () => {
+                if (!upgradeTimer) return;
+                const ticketsToUse = speedupTickets >= ticketAmount ? ticketAmount : 0;
+                const timeReduction = ticketsToUse * 300;
+                const remainingSeconds = Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000) - timeReduction;
+                const remainingMinutes = Math.max(0, remainingSeconds / 60);
+                const gemCost = Math.ceil(remainingMinutes * 10);
+                if (gems >= gemCost) {
+                    if (ticketsToUse > 0) setSpeedupTickets(t => t - ticketsToUse);
+                    setGems(g => g - gemCost);
+                    completeUpgrade();
+                    setShowTicketModal(false);
+                } else {
+                    showTooltip(`Need ${gemCost} 💎`);
+                }
+            };
+
+            const openDepositDetail = (deposit) => {
+                if (level < deposit.unlockLevel) {
+                    showTooltip(`Unlocks at LV.${deposit.unlockLevel}`);
+                    return;
+                }
+                if (activeDeposits[deposit.id]) return;
+                setSelectedDeposit(deposit);
+                setInvestAmount(Math.min(100, Math.min(gems, currentLevel.investmentCap)));
+            };
+
+            const confirmDeposit = () => setShowConfirmation(true);
+
+            const executeDeposit = () => {
+                if (investAmount > gems) return;
+                const deposit = CONFIG.deposits.find(d => d.id === selectedDeposit.id);
+                setGems(g => g - investAmount);
+                setActiveDeposits({
+                    ...activeDeposits,
+                    [deposit.id]: {
+                        amount: investAmount,
+                        startTime: Date.now(),
+                        endTime: Date.now() + deposit.duration * 24 * 60 * 60 * 1000,
+                        completed: false,
+                    }
+                });
+                setShowConfirmation(false);
+                setSelectedDeposit(null);
+            };
+
+            const collectDeposit = (depositId) => {
+                const deposit = CONFIG.deposits.find(d => d.id === depositId);
+                const active = activeDeposits[depositId];
+                if (!active || !active.completed) return;
+                const totalInterest = deposit.baseInterest + currentLevel.depositBonus;
+                const payout = Math.floor(active.amount * (1 + totalInterest));
+                setGems(g => g + payout);
+                setCollectResult(payout);
+                const updated = { ...activeDeposits };
+                delete updated[depositId];
+                setActiveDeposits(updated);
+                const card = document.querySelector(`[data-deposit-id="${depositId}"]`);
+                const gemBalance = document.querySelector('.gem-balance');
+                if (card && gemBalance) {
+                    const cardRect = card.getBoundingClientRect();
+                    const gemRect = gemBalance.getBoundingClientRect();
+                    spawnParticles(cardRect.left + cardRect.width / 2, cardRect.top + cardRect.height / 2, 20, '💎', gemRect.left + gemRect.width / 2, gemRect.top + gemRect.height / 2);
+                }
+            };
+
+            const showTooltip = (message) => {
+                setTooltip(message);
+                setTimeout(() => setTooltip(null), 2000);
+            };
+
+            const formatTime = (seconds) => {
+                const d = Math.floor(seconds / 86400);
+                const h = Math.floor((seconds % 86400) / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                if (d > 0) return `${d}d ${h}h`;
+                if (h > 0) return `${h}h ${m}m`;
+                if (m > 0) return `${m}m`;
+                return '< 1m';
+            };
+
+            const formatProductionTime = (seconds) => {
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                if (h > 0) return `${h}h ${m}m`;
+                return `${m}m`;
+            };
+
+            const getTimeUntilFull = () => {
+                const remaining = currentLevel.maxStorage - mineStorage;
+                const secondsRemaining = remaining * currentLevel.productionTime;
+                return formatTime(secondsRemaining);
+            };
+
+            const skipTime = () => {
+                setMineStorage(currentLevel.maxStorage);
+                setActiveDeposits(current => {
+                    const updated = { ...current };
+                    Object.keys(updated).forEach(key => {
+                        if (updated[key]) { updated[key].completed = true; updated[key].endTime = Date.now(); }
+                    });
+                    return updated;
+                });
+                if (upgradeTimer) completeUpgrade();
+            };
+
+            const storagePercent = (mineStorage / currentLevel.maxStorage) * 100;
+
+            const renderTroveLevelSection = () => {
+                const upgradeRemaining = upgradeTimer ? Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000) : 0;
+                return (
+                    <div className="trove-level-section-horizontal">
+                        <div className="upgrade-left">
+                            <div className="upgrade-level-label">
+                                {upgradeTimer ? `LV.${level} → ${upgradeTimer.targetLevel}` : `LV.${level}`}
+                            </div>
+                        </div>
+                        <div className="upgrade-right">
+                            {upgradeTimer ? (
+                                <>
+                                    <div className="upgrade-time-compact">{formatTime(upgradeRemaining)}</div>
+                                    <button className="speedup-button-compact primary" onClick={openTicketModal}>⏩ BOOST</button>
+                                </>
+                            ) : (
+                                <>
+                                    {nextLevel && (
+                                        <button className="upgrade-button-compact" onClick={handleUpgradeClick} disabled={gems < currentLevel.upgradeCost}>
+                                            {gems < currentLevel.upgradeCost ? `${currentLevel.upgradeCost} 💎` : `Upgrade · ${currentLevel.upgradeCost} 💎`}
+                                        </button>
+                                    )}
+                                    {!nextLevel && (
+                                        <div style={{ color: '#10B981', fontWeight: 900, fontSize: '12px', letterSpacing: '0.08em' }}>MAX</div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <>
+                    {/* Top Bar */}
+                    <div className="top-bar">
+                        <div className="gem-balance">
+                            <span className="gem-icon">💎</span>
+                            <span>{gems.toLocaleString()}</span>
+                        </div>
+                        <div className="speedup-tickets">
+                            <span className="ticket-icon">🎫</span>
+                            <span>{speedupTickets}</span>
+                        </div>
+                        <div className="level-info" onClick={() => setShowLevelInfo(true)}>
+                            <span>LV.{level}</span>
+                            <div className="info-icon">i</div>
+                        </div>
+                        <button className="close-feature-button" onClick={() => showTooltip('Closed')}>✕</button>
+                    </div>
+
+                    {/* Scrollable Content */}
+                    <div className="scrollable-content">
+                        {/* Hero */}
+                        <div className="hero-section">
+                            <div className="hero-title">Primal Trove</div>
+                            <div className="image-placeholder">⛏️</div>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className="tab-navigation">
+                            <button className={`tab-button ${activeTab === 'mine' ? 'active' : ''}`} onClick={() => setActiveTab('mine')}>
+                                Harvest
+                                {activeTab !== 'mine' && mineStorage >= 1 && <span className="tab-badge">!</span>}
+                            </button>
+                            <button className={`tab-button ${activeTab === 'investments' ? 'active' : ''}`} onClick={() => setActiveTab('investments')}>
+                                Deposits
+                                {activeTab !== 'investments' && Object.values(activeDeposits).some(d => d.completed) && <span className="tab-badge">!</span>}
+                            </button>
+                            <button className="tab-button disabled" onClick={() => showTooltip('Coming Soon')}>
+                                Upgrades <span className="lock-icon">🔒</span>
+                            </button>
+                        </div>
+
+                        {/* Tab Content */}
+                        <div className="tab-content">
+                            {activeTab === 'mine' && (
+                                <>
+                                    <div className="feature-description">
+                                        <div className="feature-description-title">Do nothing. Get Gems.</div>
+                                        Okay... almost nothing.<br />
+                                        Tap Collect before storage fills up.
+                                    </div>
+                                    {renderTroveLevelSection()}
+                                    <div className="production-section">
+                                        <div className="production-title">
+                                            {Math.floor(mineStorage)} / {currentLevel.maxStorage} 💎
+                                        </div>
+                                        <div className="production-rate">
+                                            1 💎 every {formatProductionTime(currentLevel.productionTime)}
+                                        </div>
+                                        <button
+                                            className={`collect-button ${mineStorage >= currentLevel.maxStorage ? 'collect-full' : mineStorage >= 1 ? 'collect-ready' : ''}`}
+                                            onClick={collectMine}
+                                            disabled={mineStorage < 1}
+                                        >
+                                            {mineStorage >= currentLevel.maxStorage ? '🎉 COLLECT 🎉' : 'COLLECT'}
+                                        </button>
+                                        <div className="time-until-full">
+                                            {mineStorage >= currentLevel.maxStorage ? 'STORAGE FULL' : `Full in ${getTimeUntilFull()}`}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {activeTab === 'investments' && (
+                                <>
+                                    <div className="feature-description">
+                                        <div className="feature-description-title">Lock it up. Watch it grow.</div>
+                                        Deposited Gems slowly turn into more Gems.
+                                    </div>
+                                    {renderTroveLevelSection()}
+                                    <div className="deposits-grid">
+                                        {CONFIG.deposits.map(deposit => {
+                                            const isLocked = level < deposit.unlockLevel;
+                                            const active = activeDeposits[deposit.id];
+                                            const isCompleted = active?.completed;
+                                            let timeRemaining = 0;
+                                            let progress = 0;
+                                            if (active && !isCompleted) {
+                                                timeRemaining = Math.max(0, (active.endTime - Date.now()) / 1000);
+                                                const totalTime = deposit.duration * 24 * 60 * 60;
+                                                progress = ((totalTime - timeRemaining) / totalTime) * 100;
+                                            }
+                                            return (
+                                                <div
+                                                    key={deposit.id}
+                                                    data-deposit-id={deposit.id}
+                                                    className={`deposit-card ${isLocked ? 'locked' : ''} ${active ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                                                    onClick={() => {
+                                                        if (isCompleted) collectDeposit(deposit.id);
+                                                        else if (!active) openDepositDetail(deposit);
+                                                    }}
+                                                >
+                                                    <div className="deposit-icon">{deposit.icon}</div>
+                                                    <div className="deposit-name">{deposit.name}</div>
+                                                    {isLocked && <div className="deposit-lock-badge">🔒</div>}
+                                                    {active && !isCompleted && (
+                                                        <>
+                                                            <div className="sand-timer">
+                                                                <div className="sand-timer-body">
+                                                                    <div className="sand-timer-neck"></div>
+                                                                    <div className="sand-timer-stream"></div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="deposit-timer">{formatTime(timeRemaining)}</div>
+                                                            <div className="deposit-progress">
+                                                                <div className="deposit-progress-bar" style={{ width: `${progress}%` }}></div>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                    {isCompleted && (
+                                                        <div style={{ color: '#10B981', fontWeight: 900, fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                                            Collect!
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </>
+                            )}
+
+                            {activeTab === 'upgrades' && (
+                                <>
+                                    {renderTroveLevelSection()}
+                                    <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--text-secondary)' }}>
+                                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
+                                        <div style={{ fontSize: '16px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Coming Soon</div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Bottom Bar */}
+                    <div className="bottom-bar">
+                        <div className="bottom-icon">📊</div>
+                        <div className="bottom-icon">⚔️</div>
+                        <div className="bottom-icon camping">🏕️</div>
+                        <div className="bottom-icon">🎯</div>
+                        <div className="bottom-icon">⚙️</div>
+                    </div>
+
+                    {/* Deposit Detail */}
+                    {selectedDeposit && !showConfirmation && (
+                        <div className="deposit-detail">
+                            <div className="detail-header">
+                                <button className="back-button" onClick={() => setSelectedDeposit(null)}>←</button>
+                                <div className="detail-title">{selectedDeposit.name} Deposit</div>
+                            </div>
+                            <div className="detail-content">
+                                <div className="detail-hero">
+                                    <div className="detail-hero-icon">{selectedDeposit.icon}</div>
+                                </div>
+                                <div className="detail-info">
+                                    <div className="detail-row">
+                                        <span className="detail-label">Lock</span>
+                                        <span className="detail-value">{selectedDeposit.duration}d</span>
+                                    </div>
+                                    <div className="detail-row">
+                                        <span className="detail-label">Base</span>
+                                        <span className="detail-value">{(selectedDeposit.baseInterest * 100).toFixed(0)}%</span>
+                                    </div>
+                                    <div className="detail-row">
+                                        <span className="detail-label">LV. Bonus</span>
+                                        <span className="detail-value">+{(currentLevel.depositBonus * 100).toFixed(0)}%</span>
+                                    </div>
+                                    <div className="detail-row">
+                                        <span className="detail-label">Total</span>
+                                        <span className="detail-value" style={{ color: '#10B981' }}>
+                                            {((selectedDeposit.baseInterest + currentLevel.depositBonus) * 100).toFixed(0)}%
+                                        </span>
+                                    </div>
+                                    <div className="detail-row">
+                                        <span className="detail-label">Cap</span>
+                                        <span className="detail-value">{currentLevel.investmentCap.toLocaleString()} 💎</span>
+                                    </div>
+                                </div>
+
+                                <div className="investment-input">
+                                    <div className="input-label">Amount</div>
+                                    <div className="input-value">{investAmount.toLocaleString()} 💎</div>
+                                    <input
+                                        type="range"
+                                        className="investment-slider"
+                                        min="10"
+                                        max={Math.min(gems, currentLevel.investmentCap)}
+                                        step="10"
+                                        value={investAmount}
+                                        onChange={(e) => setInvestAmount(parseInt(e.target.value))}
+                                    />
+                                </div>
+
+                                <div className="expected-payout">
+                                    <div className="payout-label">Payout</div>
+                                    <div className="payout-value">
+                                        {Math.floor(investAmount * (1 + selectedDeposit.baseInterest + currentLevel.depositBonus)).toLocaleString()} 💎
+                                    </div>
+                                </div>
+
+                                <button className="deposit-action-button" onClick={confirmDeposit}>Lock Gems</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Confirm Deposit */}
+                    {showConfirmation && (
+                        <div className="modal-overlay" onClick={() => setShowConfirmation(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">Lock Gems?</div>
+                                <div className="modal-message">No early withdrawal.</div>
+                                <div className="modal-actions">
+                                    <button className="modal-button" onClick={() => setShowConfirmation(false)}>Cancel</button>
+                                    <button className="modal-button primary" onClick={executeDeposit}>Confirm</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Confirm Upgrade */}
+                    {showUpgradeConfirm && (
+                        <div className="modal-overlay" onClick={() => setShowUpgradeConfirm(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">Upgrade?</div>
+                                <div className="modal-message">
+                                    LV.{nextLevel?.level} · {currentLevel.upgradeCost} 💎 · {formatTime(calculateUpgradeTime(level))}
+                                </div>
+                                <div className="modal-actions">
+                                    <button className="modal-button" onClick={() => setShowUpgradeConfirm(false)}>Cancel</button>
+                                    <button className="modal-button primary" onClick={confirmUpgrade}>Start</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Speed Up Modal */}
+                    {showTicketModal && upgradeTimer && (() => {
+                        const remainingSeconds = Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000);
+                        const ticketsNeeded = Math.ceil(remainingSeconds / 300);
+                        const maxTickets = Math.min(speedupTickets, ticketsNeeded);
+                        const timeReduction = ticketAmount * 5;
+                        const ticketsToUse = speedupTickets >= ticketAmount ? ticketAmount : 0;
+                        const timeAfterTickets = Math.max(0, remainingSeconds - (ticketsToUse * 300));
+                        const gemCostForFinish = Math.ceil((timeAfterTickets / 60) * 10);
+
+                        return (
+                            <div className="modal-overlay" onClick={() => setShowTicketModal(false)}>
+                                <div className="speedup-modal" onClick={(e) => e.stopPropagation()}>
+                                    <button className="speedup-close" onClick={() => setShowTicketModal(false)}>✕</button>
+                                    <div className="speedup-header">Boost</div>
+
+                                    <div className="speedup-progress-section">
+                                        <div className="speedup-level-badge">{level}</div>
+                                        <div className="speedup-progress-bar">
+                                            <div className="speedup-progress-fill" style={{ width: `${((upgradeTimer.endTime - upgradeTimer.startTime - remainingSeconds * 1000) / (upgradeTimer.endTime - upgradeTimer.startTime)) * 100}%` }} />
+                                            <div className="speedup-progress-time">{formatTime(remainingSeconds)}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="speedup-upgrading-text">{formatTime(remainingSeconds)} remaining</div>
+
+                                    <div className={`ticket-selector ${speedupTickets < 1 ? 'ticket-selector-disabled' : ''}`}>
+                                        <button className="ticket-btn" onClick={() => speedupTickets < 1 ? showTooltip('No tickets') : incrementTickets(-10)} disabled={ticketAmount <= 1 || speedupTickets < 1}>-10</button>
+                                        <button className="ticket-btn" onClick={() => speedupTickets < 1 ? showTooltip('No tickets') : incrementTickets(-1)} disabled={ticketAmount <= 1 || speedupTickets < 1}>-</button>
+                                        <div className="ticket-display" onClick={() => speedupTickets < 1 && showTooltip('No tickets')} style={{ cursor: speedupTickets < 1 ? 'pointer' : 'default' }}>
+                                            <div className="ticket-time">⏱️ {timeReduction}m</div>
+                                            <div className="ticket-count">🎫 {speedupTickets < 1 ? 0 : ticketAmount}</div>
+                                        </div>
+                                        <button className="ticket-btn" onClick={() => speedupTickets < 1 ? showTooltip('No tickets') : incrementTickets(1)} disabled={ticketAmount >= maxTickets || speedupTickets < 1}>+</button>
+                                        <button className="ticket-btn" onClick={() => speedupTickets < 1 ? showTooltip('No tickets') : incrementTickets(10)} disabled={ticketAmount >= maxTickets || speedupTickets < 1}>+10</button>
+                                    </div>
+
+                                    <div className="speedup-actions">
+                                        <button className="speedup-action-btn speedup-ticket-btn" onClick={() => speedupTickets < 1 ? showTooltip('No tickets') : confirmTicketSpeedup()} disabled={speedupTickets < 1}>
+                                            <span className="speedup-btn-icon">🎫</span>
+                                            <span className="speedup-btn-text">Use {speedupTickets < 1 ? 0 : ticketAmount}</span>
+                                            <span className="speedup-btn-icon">-{timeReduction}m</span>
+                                        </button>
+                                        <button className="speedup-action-btn speedup-finish-btn" onClick={confirmTicketAndGemFinish} disabled={gems < gemCostForFinish}>
+                                            <span className="speedup-btn-icon">💎</span>
+                                            <span className="speedup-btn-text">Finish</span>
+                                            <span className="speedup-btn-icon">{gemCostForFinish}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })()}
+
+                    {/* Gem Finish Confirm */}
+                    {showGemConfirm && upgradeTimer && (
+                        <div className="modal-overlay" onClick={() => setShowGemConfirm(false)}>
+                            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-title">Finish Now?</div>
+                                <div className="modal-message">
+                                    {Math.ceil(Math.max(0, (upgradeTimer.endTime - Date.now()) / 1000 / 60) * 10)} 💎
+                                </div>
+                                <div className="modal-actions">
+                                    <button className="modal-button" onClick={() => setShowGemConfirm(false)}>Cancel</button>
+                                    <button className="modal-button primary" onClick={confirmGemSpeedup}>Confirm</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Level Info */}
+                    {showLevelInfo && (
+                        <div className="level-info-modal" onClick={() => setShowLevelInfo(false)}>
+                            <div className="level-info-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="level-info-title">Levels</div>
+                                {CONFIG.levels.map((lvl, idx) => (
+                                    <div key={idx} className={`level-item ${lvl.level === level ? 'current' : ''}`} id={`level-${lvl.level}`}>
+                                        <div className="level-header">LV.{lvl.level}</div>
+                                        <div className="level-stats">
+                                            Cap {lvl.maxStorage} 💎 · Rate 1💎/{formatProductionTime(lvl.productionTime)}<br />
+                                            Bonus +{(lvl.depositBonus * 100).toFixed(0)}% · Max {lvl.investmentCap.toLocaleString()} 💎
+                                            {lvl.upgradeCost && <><br />Cost {lvl.upgradeCost} 💎</>}
+                                        </div>
+                                    </div>
+                                ))}
+                                <button className="close-button" onClick={() => setShowLevelInfo(false)}>Close</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Collect Result Modal */}
+                    {collectResult !== null && (
+                        <div className="collect-modal-overlay" onClick={() => setCollectResult(null)}>
+                            <div className="collect-modal" onClick={(e) => e.stopPropagation()}>
+                                <div className="collect-modal-icon">💎</div>
+                                <div className="collect-modal-amount">+{collectResult.toLocaleString()}</div>
+                                <div className="collect-modal-label">Gems Collected</div>
+                                <button className="collect-modal-btn" onClick={() => setCollectResult(null)}>Collect</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tooltip */}
+                    {tooltip && <div className="floating-tooltip">{tooltip}</div>}
+
+                    {/* Particles */}
+                    <div className="particle-container">
+                        {particles.map(particle => {
+                            const style = { left: `${particle.x}px`, top: `${particle.y}px` };
+                            if (particle.flyToTarget) {
+                                style['--dx'] = `${particle.targetX - particle.x}px`;
+                                style['--dy'] = `${particle.targetY - particle.y}px`;
+                            }
+                            return <div key={particle.id} className={`particle ${particle.flyToTarget ? 'particle-fly' : ''}`} style={style}>{particle.emoji}</div>;
+                        })}
+                    </div>
+
+                    {/* Level Up */}
+                    {showLevelUp && (
+                        <div className="level-up-container">
+                            <div className="level-up-banner">
+                                <div className="level-up-text">LEVEL UP</div>
+                                <div className="level-up-sub">LV. {level}</div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Debug */}
+                    <button className="debug-button" onClick={skipTime}>⚡ SKIP</button>
+                </>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
 </body>
+
 </html>
